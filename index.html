@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HI-UEO — AI Agent Builder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #38bdf8;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            color: #94a3b8;
+            font-size: 18px;
+        }
+
+        .panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 18px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #0ea5e9;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0284c7;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #cbd5e1;
+            min-height: 60px;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            main {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">HI-<span>UEO</span></div>
+</header>
+
+<main>
+
+    <section class="hero">
+        <h1>Build Your AI Agent</h1>
+        <p>Buat AI Agent sendiri dan jalankan tugas secara otomatis.</p>
+    </section>
+
+    <section class="panel">
+
+        <h2>Create Agent</h2>
+
+        <label>Nama Agent</label>
+
+        <input
+            type="text"
+            id="agentName"
+            placeholder="Contoh: YouTube Content Agent"
+        >
+
+        <label>Instruksi Agent</label>
+
+        <textarea
+            id="agentInstruction"
+            placeholder="Jelaskan apa yang harus dilakukan oleh agent..."
+        ></textarea>
+
+        <label>Tugas</label>
+
+        <textarea
+            id="agentTask"
+            placeholder="Masukkan tugas yang ingin dikerjakan..."
+        ></textarea>
+
+        <button onclick="runAgent()">
+            ▶ RUN AGENT
+        </button>
+
+        <div id="result">
+            Hasil agent akan muncul di sini.
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+
+function runAgent() {
+
+    const name = document.getElementById("agentName").value;
+    const instruction = document.getElementById("agentInstruction").value;
+    const task = document.getElementById("agentTask").value;
+
+    if (!name || !instruction || !task) {
+        document.getElementById("result").innerText =
+            "Silakan isi semua kolom terlebih dahulu.";
+        return;
+    }
+
+    document.getElementById("result").innerText =
+        "Agent \"" + name + "\" siap dijalankan.\n\n" +
+        "Instruksi:\n" + instruction +
+        "\n\nTugas:\n" + task +
+        "\n\nMesin AI akan kita hubungkan pada langkah berikutnya.";
+}
+
+</script>
+
+</body>
+</html>
