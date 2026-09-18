@@ -14,115 +14,280 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top, #1e3a8a 0%, #0f172a 45%);
+            color: #ffffff;
             min-height: 100vh;
         }
 
         header {
-            padding: 20px;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            background: rgba(15,23,42,.75);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: auto;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
 
         .logo span {
             color: #38bdf8;
         }
 
+        .version {
+            font-size: 12px;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 6px 10px;
+            border-radius: 20px;
+        }
+
         main {
-            max-width: 1000px;
+            width: 100%;
+            max-width: 1100px;
             margin: auto;
-            padding: 40px 20px;
+            padding: 55px 20px;
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 45px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 30px;
+            background: rgba(56,189,248,.12);
+            border: 1px solid rgba(56,189,248,.25);
+            color: #7dd3fc;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
 
         .hero h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
+            font-size: clamp(34px, 7vw, 58px);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: #38bdf8;
         }
 
         .hero p {
+            max-width: 650px;
+            margin: auto;
             color: #94a3b8;
-            font-size: 18px;
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
         }
 
         .panel {
-            background: #1e293b;
+            background: rgba(30,41,59,.82);
             border: 1px solid #334155;
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 25px;
-            margin-bottom: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.18);
         }
 
         .panel h2 {
-            margin-bottom: 20px;
+            font-size: 20px;
+            margin-bottom: 22px;
+        }
+
+        .panel-description {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: -12px;
+            margin-bottom: 22px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
             color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         input,
-        textarea {
+        textarea,
+        select {
             width: 100%;
-            padding: 14px;
-            border-radius: 10px;
             border: 1px solid #475569;
             background: #0f172a;
-            color: white;
+            color: #ffffff;
+            border-radius: 11px;
+            padding: 13px 14px;
+            font-size: 14px;
+            outline: none;
             margin-bottom: 18px;
-            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56,189,248,.1);
         }
 
         textarea {
-            min-height: 130px;
+            min-height: 115px;
             resize: vertical;
+            line-height: 1.5;
         }
 
-        button {
+        .api-note {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: -10px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .run-button {
             width: 100%;
-            padding: 15px;
             border: none;
-            border-radius: 10px;
-            background: #0ea5e9;
+            border-radius: 12px;
+            padding: 15px;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
             color: white;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
+            transition: .2s;
         }
 
-        button:hover {
-            background: #0284c7;
+        .run-button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        .run-button:disabled {
+            opacity: .6;
+            cursor: wait;
+            transform: none;
+        }
+
+        .result-panel {
+            margin-top: 22px;
         }
 
         #result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            background: #0f172a;
+            min-height: 220px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 18px;
             color: #cbd5e1;
-            min-height: 60px;
             white-space: pre-wrap;
+            line-height: 1.65;
+            font-size: 14px;
+            overflow-x: auto;
         }
 
-        @media (max-width: 600px) {
-            .hero h1 {
-                font-size: 32px;
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .features {
+            margin-top: 35px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .feature {
+            background: rgba(15,23,42,.65);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            font-size: 15px;
+            margin-bottom: 7px;
+        }
+
+        .feature p {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 35px 20px;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
             }
 
             main {
-                padding: 25px 15px;
+                padding: 40px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            .header-inner {
+                padding: 15px;
             }
         }
     </style>
@@ -131,76 +296,155 @@
 <body>
 
 <header>
-    <div class="logo">HI-<span>UEO</span></div>
+    <div class="header-inner">
+        <div class="logo">HI-<span>UEO</span></div>
+        <div class="version">v0.1</div>
+    </div>
 </header>
 
 <main>
 
     <section class="hero">
-        <h1>Build Your AI Agent</h1>
-        <p>Buat AI Agent sendiri dan jalankan tugas secara otomatis.</p>
+
+        <div class="badge">
+            ⚡ AI Agent Builder
+        </div>
+
+        <h1>
+            Build Your <span>AI Agent</span>
+        </h1>
+
+        <p>
+            Buat agent AI sendiri, berikan instruksi,
+            masukkan tugas, lalu biarkan AI mengerjakannya.
+        </p>
+
     </section>
 
-    <section class="panel">
+    <div class="grid">
 
-        <h2>Create Agent</h2>
+        <section class="panel">
 
-        <label>Nama Agent</label>
+            <h2>🤖 Create Agent</h2>
 
-        <input
-            type="text"
-            id="agentName"
-            placeholder="Contoh: YouTube Content Agent"
-        >
+            <p class="panel-description">
+                Tentukan identitas dan kemampuan agent yang ingin kamu buat.
+            </p>
 
-        <label>Instruksi Agent</label>
+            <label for="apiKey">
+                Gemini API Key
+            </label>
 
-        <textarea
-            id="agentInstruction"
-            placeholder="Jelaskan apa yang harus dilakukan oleh agent..."
-        ></textarea>
+            <input
+                type="password"
+                id="apiKey"
+                placeholder="Masukkan Gemini API Key"
+                autocomplete="off"
+            >
 
-        <label>Tugas</label>
+            <div class="api-note">
+                🔒 API key hanya digunakan di browser ini dan tidak
+                disimpan di repository HI-UEO.
+            </div>
 
-        <textarea
-            id="agentTask"
-            placeholder="Masukkan tugas yang ingin dikerjakan..."
-        ></textarea>
+            <label for="agentName">
+                Nama Agent
+            </label>
 
-        <button onclick="runAgent()">
-            ▶ RUN AGENT
-        </button>
+            <input
+                type="text"
+                id="agentName"
+                placeholder="Contoh: YouTube Content Agent"
+            >
 
-        <div id="result">
-            Hasil agent akan muncul di sini.
+            <label for="agentInstruction">
+                Instruksi Agent
+            </label>
+
+            <textarea
+                id="agentInstruction"
+                placeholder="Contoh: Kamu adalah ahli content creator Indonesia. Buat konten yang menarik, praktis, dan mudah dipahami."
+            ></textarea>
+
+            <label for="agentTask">
+                Tugas
+            </label>
+
+            <textarea
+                id="agentTask"
+                placeholder="Contoh: Buat 5 ide konten Facebook untuk penjual UMKM."
+            ></textarea>
+
+            <button
+                class="run-button"
+                id="runButton"
+                onclick="runAgent()"
+            >
+                ▶ RUN AGENT
+            </button>
+
+        </section>
+
+        <section class="panel">
+
+            <h2>⚡ Agent Output</h2>
+
+            <div class="status">
+                <span class="dot"></span>
+                <span id="statusText">Ready</span>
+            </div>
+
+            <div id="result">
+Hasil agent akan muncul di sini.
+
+Contoh:
+"Masukkan API Key, nama agent,
+instruksi, dan tugas kemudian
+tekan RUN AGENT."
+            </div>
+
+        </section>
+
+    </div>
+
+    <section class="features">
+
+        <div class="feature">
+            <div class="feature-icon">🧠</div>
+            <h3>AI Brain</h3>
+            <p>
+                Agent menggunakan model AI untuk memahami
+                instruksi dan menyelesaikan tugas.
+            </p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">🔧</div>
+            <h3>Tools</h3>
+            <p>
+                Nantinya agent dapat menggunakan berbagai
+                tools untuk melakukan pekerjaan.
+            </p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">🔄</div>
+            <h3>Workflow</h3>
+            <p>
+                Nantinya kita dapat menggabungkan beberapa
+                langkah menjadi workflow otomatis.
+            </p>
         </div>
 
     </section>
 
 </main>
 
-<script>
+<footer>
+    HI-UEO — AI Agent Builder
+</footer>
 
-function runAgent() {
-
-    const name = document.getElementById("agentName").value;
-    const instruction = document.getElementById("agentInstruction").value;
-    const task = document.getElementById("agentTask").value;
-
-    if (!name || !instruction || !task) {
-        document.getElementById("result").innerText =
-            "Silakan isi semua kolom terlebih dahulu.";
-        return;
-    }
-
-    document.getElementById("result").innerText =
-        "Agent \"" + name + "\" siap dijalankan.\n\n" +
-        "Instruksi:\n" + instruction +
-        "\n\nTugas:\n" + task +
-        "\n\nMesin AI akan kita hubungkan pada langkah berikutnya.";
-}
-
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
