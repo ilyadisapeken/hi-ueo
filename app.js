@@ -13,21 +13,21 @@ const TOOL_INFO = {
         name: "Calculator",
         icon: "🧮",
         description:
-            "Membantu melakukan perhitungan matematika."
+            "Menghitung operasi matematika."
     },
 
     text_processor: {
         name: "Text Processor",
         icon: "📝",
         description:
-            "Membantu mengolah, meringkas, memperbaiki, dan menyusun teks."
+            "Mengolah, meringkas, memperbaiki, dan menyusun teks."
     },
 
     web_search: {
         name: "Web Search",
         icon: "🌐",
         description:
-            "Kemampuan yang disiapkan untuk kebutuhan pencarian informasi web."
+            "Kemampuan untuk pencarian informasi web."
     }
 
 };
@@ -147,6 +147,269 @@ function setSelectedTools(tools) {
 }
 
 
+/* ==================================================
+   REAL CALCULATOR TOOL
+================================================== */
+
+/*
+   Calculator hanya menerima karakter matematika
+   yang aman:
+
+   angka
+   + - * / %
+   kurung
+   titik
+   spasi
+
+   Contoh:
+   100 + 50
+   1000000 * 15 / 100
+   (500 + 250) * 2
+*/
+
+
+function calculateExpression(expression) {
+
+    if (!expression) {
+        throw new Error(
+            "Ekspresi matematika kosong."
+        );
+    }
+
+
+    let clean =
+        String(expression)
+            .replace(/,/g, "")
+            .replace(/\s+/g, "");
+
+
+    /*
+       Hanya izinkan angka dan operator matematika.
+    */
+
+    if (!/^[0-9+\-*/().%]+$/.test(clean)) {
+
+        throw new Error(
+            "Ekspresi mengandung karakter yang tidak didukung."
+        );
+    }
+
+
+    /*
+       Cegah pola operator yang berbahaya
+       atau tidak valid.
+    */
+
+    if (
+        clean.includes("**") ||
+        clean.includes("//")
+    ) {
+
+        throw new Error(
+            "Operator matematika tidak valid."
+        );
+    }
+
+
+    try {
+
+        /*
+           Karena ekspresi sudah melewati whitelist
+           karakter matematika, evaluasi hanya dilakukan
+           terhadap ekspresi tersebut.
+        */
+
+        const result =
+            Function(
+                `"use strict"; return (${clean})`
+            )();
+
+
+        if (
+            typeof result !== "number" ||
+            !Number.isFinite(result)
+        ) {
+
+            throw new Error(
+                "Hasil perhitungan tidak valid."
+            );
+        }
+
+
+        return result;
+
+    } catch (error) {
+
+        throw new Error(
+            "Ekspresi matematika tidak valid."
+        );
+    }
+}
+
+
+/* =========================
+   FIND CALCULATIONS
+========================= */
+
+function findCalculationExpressions(text) {
+
+    const expressions = [];
+
+
+    /*
+       Mencari pola sederhana seperti:
+
+       100 + 200
+       1000 * 15 / 100
+       (100 + 200) * 2
+    */
+
+    const matches =
+        text.match(
+            /(?:?\d+(?:[.,]\d+)??\s*(?:[+\-*/%]\s*?\d+(?:[.,]\d+)??)+)/g
+        );
+
+
+    if (!matches) {
+        return expressions;
+    }
+
+
+    matches.forEach(expression => {
+
+        const normalized =
+            expression.replace(/,/g, "");
+
+
+        if (!expressions.includes(normalized)) {
+
+            expressions.push(
+                normalized
+            );
+        }
+
+    });
+
+
+    return expressions;
+}
+
+
+/* =========================
+   RUN CALCULATOR
+========================= */
+
+function runCalculator(task) {
+
+    const expressions =
+        findCalculationExpressions(task);
+
+
+    if (expressions.length === 0) {
+
+        return {
+            used: false,
+            results: []
+        };
+    }
+
+
+    const results = [];
+
+
+    for (const expression of expressions) {
+
+        try {
+
+            const value =
+                calculateExpression(
+                    expression
+                );
+
+
+            results.push({
+
+                expression:
+                    expression,
+
+                result:
+                    value
+
+            });
+
+        } catch (error) {
+
+            results.push({
+
+                expression:
+                    expression,
+
+                error:
+                    error.message
+
+            });
+
+        }
+
+    }
+
+
+    return {
+
+        used: true,
+
+        results:
+            results
+
+    };
+}
+
+
+/* =========================
+   BUILD CALCULATOR CONTEXT
+========================= */
+
+function buildCalculatorContext(task) {
+
+    const calculator =
+        runCalculator(task);
+
+
+    if (!calculator.used) {
+
+        return "";
+    }
+
+
+    let context =
+        "\n\nHASIL CALCULATOR HI-UEO:\n";
+
+
+    calculator.results.forEach(item => {
+
+        if (item.error) {
+
+            context +=
+                `- ${item.expression} → ERROR: ${item.error}\n`;
+
+        } else {
+
+            context +=
+                `- ${item.expression} = ${item.result}\n`;
+
+        }
+
+    });
+
+
+    context +=
+        "\nGunakan hasil Calculator di atas jika relevan dengan tugas pengguna.\n";
+
+
+    return context;
+}
+
+
 /* =========================
    BUILD TOOL PROMPT
 ========================= */
@@ -165,18 +428,12 @@ Tidak ada tool tambahan yang dipilih.
     const descriptions =
         tools.map(tool => {
 
-            const info =
-                TOOL_INFO[tool];
-
-            if (!info) {
-                return "";
-            }
-
             if (tool === "calculator") {
 
                 return `
-- Calculator: Gunakan kemampuan penalaran matematika
-  untuk menghitung angka dengan teliti.
+- Calculator: HI-UEO dapat melakukan perhitungan
+  matematika secara langsung sebelum meminta Gemini
+  menyusun jawaban.
 `;
             }
 
@@ -184,7 +441,7 @@ Tidak ada tool tambahan yang dipilih.
             if (tool === "text_processor") {
 
                 return `
-- Text Processor: Fokus pada pengolahan teks seperti
+- Text Processor: digunakan untuk mengolah teks seperti
   meringkas, memperbaiki, menyusun, atau mengubah gaya teks.
 `;
             }
@@ -193,18 +450,15 @@ Tidak ada tool tambahan yang dipilih.
             if (tool === "web_search") {
 
                 return `
-- Web Search: Agent ditandai memiliki kebutuhan pencarian
-  informasi web. Namun pada versi HI-UEO ini belum ada
-  koneksi langsung ke mesin pencari eksternal. Jangan
-  mengklaim telah melakukan pencarian internet jika memang
-  tidak dilakukan.
+- Web Search: disiapkan untuk pencarian informasi web.
+  Pada versi ini koneksi ke mesin pencari eksternal
+  belum tersedia. Jangan mengklaim telah browsing internet.
 `;
             }
 
 
-            return `
-- ${info.name}: ${info.description}
-`;
+            return "";
+
         }).join("");
 
 
@@ -235,6 +489,17 @@ async function runGemini(
         );
 
 
+    /*
+       Jika Calculator aktif,
+       jalankan Calculator terlebih dahulu.
+    */
+
+    const calculatorContext =
+        selectedTools.includes("calculator")
+            ? buildCalculatorContext(task)
+            : "";
+
+
     const prompt = `
 Kamu adalah AI Agent bernama "${getAgentName()}".
 
@@ -246,6 +511,8 @@ ${task}
 
 ${toolInstructions}
 
+${calculatorContext}
+
 ATURAN:
 1. Pahami instruksi agent.
 2. Kerjakan tugas pengguna secara langsung.
@@ -253,7 +520,8 @@ ATURAN:
 4. Berikan hasil yang jelas dan terstruktur.
 5. Gunakan bahasa Indonesia kecuali pengguna meminta bahasa lain.
 6. Gunakan tool yang tersedia jika relevan.
-7. Jangan mengklaim menggunakan tool eksternal yang sebenarnya tidak tersedia.
+7. Jika terdapat HASIL CALCULATOR HI-UEO, gunakan hasil tersebut dan jangan mengubah angka hasil perhitungan.
+8. Jangan mengklaim menggunakan tool eksternal yang sebenarnya tidak tersedia.
 `;
 
 
@@ -416,16 +684,56 @@ async function runAgent() {
         getSelectedTools();
 
 
+    let calculatorPreview = "";
+
+
+    if (
+        selectedTools.includes("calculator")
+    ) {
+
+        const calc =
+            runCalculator(task);
+
+
+        if (calc.used) {
+
+            calculatorPreview =
+                "\n\n🧮 Calculator dijalankan...\n";
+
+            calc.results.forEach(item => {
+
+                if (item.error) {
+
+                    calculatorPreview +=
+                        `❌ ${item.expression}: ${item.error}\n`;
+
+                } else {
+
+                    calculatorPreview +=
+                        `✓ ${item.expression} = ${item.result}\n`;
+
+                }
+
+            });
+
+        }
+
+    }
+
+
     result.innerText =
-        "🤖 HI-UEO sedang menghubungi Gemini...\n\n" +
+        "🤖 HI-UEO sedang bekerja...\n\n" +
         (
             selectedTools.length > 0
                 ? `🔧 Tools aktif: ${selectedTools
-                    .map(tool => TOOL_INFO[tool]?.name || tool)
-                    .join(", ")}\n\n`
+                    .map(tool =>
+                        TOOL_INFO[tool]?.name || tool
+                    )
+                    .join(", ")}\n`
                 : ""
         ) +
-        "Mohon tunggu.";
+        calculatorPreview +
+        "\n⏳ Menghubungi Gemini...";
 
 
     try {
@@ -481,438 +789,4 @@ function saveAgent() {
             .value.trim();
 
     const instruction =
-        document.getElementById("agentInstruction")
-            .value.trim();
-
-    const task =
-        document.getElementById("agentTask")
-            .value.trim();
-
-    const selectedTools =
-        getSelectedTools();
-
-
-    const result =
-        document.getElementById("result");
-
-    const statusText =
-        document.getElementById("statusText");
-
-
-    if (!name) {
-
-        result.innerText =
-            "❌ Isi Nama Agent terlebih dahulu.";
-
-        statusText.innerText =
-            "Nama agent diperlukan";
-
-        return;
-    }
-
-
-    if (!instruction) {
-
-        result.innerText =
-            "❌ Isi Instruksi Agent terlebih dahulu.";
-
-        statusText.innerText =
-            "Instruksi diperlukan";
-
-        return;
-    }
-
-
-    let agents =
-        getSavedAgents();
-
-
-    const newAgent = {
-
-        id:
-            Date.now(),
-
-        name:
-            name,
-
-        instruction:
-            instruction,
-
-        task:
-            task,
-
-        tools:
-            selectedTools,
-
-        createdAt:
-            new Date().toISOString()
-    };
-
-
-    agents.push(newAgent);
-
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(agents)
-    );
-
-
-    result.innerText =
-        "✅ AGENT TERSIMPAN\n\n" +
-        `"${name}" berhasil disimpan ke My Agents.\n\n` +
-        (
-            selectedTools.length > 0
-                ? "Tools: " +
-                  selectedTools
-                    .map(tool =>
-                        TOOL_INFO[tool]?.name || tool
-                    )
-                    .join(", ")
-                : "Tidak menggunakan tool."
-        );
-
-
-    statusText.innerText =
-        "Agent Saved";
-
-
-    renderAgents();
-}
-
-
-/* =========================
-   GET SAVED AGENTS
-========================= */
-
-function getSavedAgents() {
-
-    try {
-
-        const data =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
-
-
-        if (!data) {
-            return [];
-        }
-
-
-        const parsed =
-            JSON.parse(data);
-
-
-        return Array.isArray(parsed)
-            ? parsed
-            : [];
-
-
-    } catch (error) {
-
-        console.error(
-            "Gagal membaca agent:",
-            error
-        );
-
-        return [];
-    }
-}
-
-
-/* =========================
-   DISPLAY AGENTS
-========================= */
-
-function renderAgents() {
-
-    const agents =
-        getSavedAgents();
-
-
-    const container =
-        document.getElementById(
-            "agentsList"
-        );
-
-
-    const count =
-        document.getElementById(
-            "agentCount"
-        );
-
-
-    count.innerText =
-        `${agents.length} Agent`;
-
-
-    if (agents.length === 0) {
-
-        container.innerHTML = `
-            <div class="empty-agents">
-                Belum ada agent yang disimpan.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        agents.map(agent => {
-
-            const tools =
-                Array.isArray(agent.tools)
-                    ? agent.tools
-                    : [];
-
-
-            const toolText =
-                tools.length > 0
-                    ? tools.map(tool =>
-                        `${TOOL_INFO[tool]?.icon || "🔧"} ${TOOL_INFO[tool]?.name || tool}`
-                      ).join(" • ")
-                    : "Tidak ada tool";
-
-
-            return `
-
-                <div class="agent-card">
-
-                    <h3>
-                        🤖 ${escapeHtml(agent.name)}
-                    </h3>
-
-                    <p>
-                        ${escapeHtml(
-                            agent.instruction
-                        )}
-                    </p>
-
-                    <div class="agent-tools">
-                        🔧 ${escapeHtml(toolText)}
-                    </div>
-
-                    <div class="agent-card-buttons">
-
-                        <button
-                            class="open-agent"
-                            onclick="openAgent(${agent.id})"
-                        >
-                            BUKA
-                        </button>
-
-                        <button
-                            class="delete-agent"
-                            onclick="deleteAgent(${agent.id})"
-                        >
-                            HAPUS
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        }).join("");
-}
-
-
-/* =========================
-   OPEN AGENT
-========================= */
-
-function openAgent(id) {
-
-    const agents =
-        getSavedAgents();
-
-
-    const agent =
-        agents.find(
-            item => item.id === id
-        );
-
-
-    if (!agent) {
-        return;
-    }
-
-
-    document.getElementById(
-        "agentName"
-    ).value =
-        agent.name;
-
-
-    document.getElementById(
-        "agentInstruction"
-    ).value =
-        agent.instruction;
-
-
-    document.getElementById(
-        "agentTask"
-    ).value =
-        agent.task || "";
-
-
-    /*
-    Restore tools.
-    Agent lama yang belum memiliki
-    property tools otomatis dianggap
-    tidak memiliki tool.
-    */
-
-    setSelectedTools(
-        Array.isArray(agent.tools)
-            ? agent.tools
-            : []
-    );
-
-
-    const toolText =
-        Array.isArray(agent.tools) &&
-        agent.tools.length > 0
-
-            ? agent.tools
-                .map(tool =>
-                    TOOL_INFO[tool]?.name || tool
-                )
-                .join(", ")
-
-            : "Tidak ada tool";
-
-
-    document.getElementById(
-        "result"
-    ).innerText =
-        `🤖 Agent "${agent.name}" berhasil dimuat.\n\n` +
-        `🔧 Tools: ${toolText}\n\n` +
-        "Masukkan API Key jika diperlukan, lalu jalankan agent.";
-
-
-    document.getElementById(
-        "statusText"
-    ).innerText =
-        "Agent Loaded";
-
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
-
-
-/* =========================
-   DELETE AGENT
-========================= */
-
-function deleteAgent(id) {
-
-    const agents =
-        getSavedAgents();
-
-
-    const agent =
-        agents.find(
-            item => item.id === id
-        );
-
-
-    if (!agent) {
-        return;
-    }
-
-
-    const confirmDelete =
-        confirm(
-            `Hapus agent "${agent.name}"?`
-        );
-
-
-    if (!confirmDelete) {
-        return;
-    }
-
-
-    const updatedAgents =
-        agents.filter(
-            item => item.id !== id
-        );
-
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updatedAgents)
-    );
-
-
-    renderAgents();
-
-
-    document.getElementById(
-        "result"
-    ).innerText =
-        `🗑️ Agent "${agent.name}" telah dihapus.`;
-
-
-    document.getElementById(
-        "statusText"
-    ).innerText =
-        "Agent Deleted";
-}
-
-
-/* =========================
-   SECURITY
-========================= */
-
-function escapeHtml(value) {
-
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-}
-
-
-/* =========================
-   START APP
-========================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        renderAgents();
-
-        updateToolUI();
-
-    }
-);
+        document.get
