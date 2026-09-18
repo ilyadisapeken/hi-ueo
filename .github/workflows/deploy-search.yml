@@ -13,14 +13,25 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: Ambil kode dari GitHub
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Deploy ke Cloudflare Worker
+      - name: Create Wrangler configuration
+        run: |
+          cat > wrangler.jsonc <<'EOF'
+          {
+            "name": "hi-ueo-search",
+            "main": "./worker.js",
+            "compatibility_date": "2026-09-19"
+          }
+          EOF
+
+      - name: Deploy Worker to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy worker.js --name hi-ueo-search
+          command: deploy
