@@ -3,6 +3,40 @@ const GEMINI_MODEL = "gemini-3.1-flash-lite";
 const STORAGE_KEY = "hi_ueo_agents";
 
 
+/* =========================
+   TOOL INFORMATION
+========================= */
+
+const TOOL_INFO = {
+
+    calculator: {
+        name: "Calculator",
+        icon: "🧮",
+        description:
+            "Membantu melakukan perhitungan matematika."
+    },
+
+    text_processor: {
+        name: "Text Processor",
+        icon: "📝",
+        description:
+            "Membantu mengolah, meringkas, memperbaiki, dan menyusun teks."
+    },
+
+    web_search: {
+        name: "Web Search",
+        icon: "🌐",
+        description:
+            "Kemampuan yang disiapkan untuk kebutuhan pencarian informasi web."
+    }
+
+};
+
+
+/* =========================
+   GET AGENT NAME
+========================= */
+
 function getAgentName() {
 
     const element =
@@ -13,11 +47,193 @@ function getAgentName() {
 }
 
 
+/* =========================
+   TOOL TOGGLE
+========================= */
+
+function toggleTool(card) {
+
+    if (!card) {
+        return;
+    }
+
+    card.classList.toggle("active");
+
+    updateToolUI();
+}
+
+
+/* =========================
+   GET SELECTED TOOLS
+========================= */
+
+function getSelectedTools() {
+
+    return Array.from(
+        document.querySelectorAll(".tool-card.active")
+    ).map(card =>
+        card.dataset.tool
+    );
+}
+
+
+/* =========================
+   UPDATE TOOL UI
+========================= */
+
+function updateToolUI() {
+
+    const selectedTools =
+        getSelectedTools();
+
+    const status =
+        document.getElementById("toolStatus");
+
+
+    if (!status) {
+        return;
+    }
+
+
+    if (selectedTools.length === 0) {
+
+        status.innerText =
+            "🔧 Belum ada tool dipilih.";
+
+        return;
+    }
+
+
+    const names =
+        selectedTools.map(tool =>
+            TOOL_INFO[tool]?.name || tool
+        );
+
+
+    status.innerText =
+        `🔧 ${selectedTools.length} tool aktif: ` +
+        names.join(", ");
+}
+
+
+/* =========================
+   SET SELECTED TOOLS
+========================= */
+
+function setSelectedTools(tools) {
+
+    const selected =
+        Array.isArray(tools)
+            ? tools
+            : [];
+
+
+    document
+        .querySelectorAll(".tool-card")
+        .forEach(card => {
+
+            const tool =
+                card.dataset.tool;
+
+            card.classList.toggle(
+                "active",
+                selected.includes(tool)
+            );
+
+        });
+
+
+    updateToolUI();
+}
+
+
+/* =========================
+   BUILD TOOL PROMPT
+========================= */
+
+function buildToolInstructions(tools) {
+
+    if (!tools || tools.length === 0) {
+
+        return `
+TOOLS AGENT:
+Tidak ada tool tambahan yang dipilih.
+`;
+    }
+
+
+    const descriptions =
+        tools.map(tool => {
+
+            const info =
+                TOOL_INFO[tool];
+
+            if (!info) {
+                return "";
+            }
+
+            if (tool === "calculator") {
+
+                return `
+- Calculator: Gunakan kemampuan penalaran matematika
+  untuk menghitung angka dengan teliti.
+`;
+            }
+
+
+            if (tool === "text_processor") {
+
+                return `
+- Text Processor: Fokus pada pengolahan teks seperti
+  meringkas, memperbaiki, menyusun, atau mengubah gaya teks.
+`;
+            }
+
+
+            if (tool === "web_search") {
+
+                return `
+- Web Search: Agent ditandai memiliki kebutuhan pencarian
+  informasi web. Namun pada versi HI-UEO ini belum ada
+  koneksi langsung ke mesin pencari eksternal. Jangan
+  mengklaim telah melakukan pencarian internet jika memang
+  tidak dilakukan.
+`;
+            }
+
+
+            return `
+- ${info.name}: ${info.description}
+`;
+        }).join("");
+
+
+    return `
+TOOLS AGENT:
+${descriptions}
+`;
+}
+
+
+/* =========================
+   GEMINI
+========================= */
+
 async function runGemini(
     apiKey,
     instruction,
     task
 ) {
+
+    const selectedTools =
+        getSelectedTools();
+
+
+    const toolInstructions =
+        buildToolInstructions(
+            selectedTools
+        );
+
 
     const prompt = `
 Kamu adalah AI Agent bernama "${getAgentName()}".
@@ -28,44 +244,50 @@ ${instruction}
 TUGAS PENGGUNA:
 ${task}
 
+${toolInstructions}
+
 ATURAN:
 1. Pahami instruksi agent.
 2. Kerjakan tugas pengguna secara langsung.
 3. Jangan menjelaskan proses internalmu.
 4. Berikan hasil yang jelas dan terstruktur.
 5. Gunakan bahasa Indonesia kecuali pengguna meminta bahasa lain.
+6. Gunakan tool yang tersedia jika relevan.
+7. Jangan mengklaim menggunakan tool eksternal yang sebenarnya tidak tersedia.
 `;
 
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-        {
-            method: "POST",
 
-            headers: {
-                "Content-Type": "application/json",
-                "x-goog-api-key": apiKey
-            },
+    const response =
+        await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+            {
+                method: "POST",
 
-            body: JSON.stringify({
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": apiKey
+                },
 
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: prompt
-                            }
-                        ]
+                body: JSON.stringify({
+
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: prompt
+                                }
+                            ]
+                        }
+                    ],
+
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 2000
                     }
-                ],
 
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 2000
-                }
-
-            })
-        }
-    );
+                })
+            }
+        );
 
 
     const data =
@@ -189,8 +411,20 @@ async function runAgent() {
     statusText.innerText =
         "Agent sedang bekerja...";
 
+
+    const selectedTools =
+        getSelectedTools();
+
+
     result.innerText =
         "🤖 HI-UEO sedang menghubungi Gemini...\n\n" +
+        (
+            selectedTools.length > 0
+                ? `🔧 Tools aktif: ${selectedTools
+                    .map(tool => TOOL_INFO[tool]?.name || tool)
+                    .join(", ")}\n\n`
+                : ""
+        ) +
         "Mohon tunggu.";
 
 
@@ -254,6 +488,10 @@ function saveAgent() {
         document.getElementById("agentTask")
             .value.trim();
 
+    const selectedTools =
+        getSelectedTools();
+
+
     const result =
         document.getElementById("result");
 
@@ -303,6 +541,9 @@ function saveAgent() {
         task:
             task,
 
+        tools:
+            selectedTools,
+
         createdAt:
             new Date().toISOString()
     };
@@ -319,7 +560,18 @@ function saveAgent() {
 
     result.innerText =
         "✅ AGENT TERSIMPAN\n\n" +
-        `"${name}" berhasil disimpan ke My Agents.`;
+        `"${name}" berhasil disimpan ke My Agents.\n\n` +
+        (
+            selectedTools.length > 0
+                ? "Tools: " +
+                  selectedTools
+                    .map(tool =>
+                        TOOL_INFO[tool]?.name || tool
+                    )
+                    .join(", ")
+                : "Tidak menggunakan tool."
+        );
+
 
     statusText.innerText =
         "Agent Saved";
@@ -342,11 +594,20 @@ function getSavedAgents() {
                 STORAGE_KEY
             );
 
+
         if (!data) {
             return [];
         }
 
-        return JSON.parse(data);
+
+        const parsed =
+            JSON.parse(data);
+
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
 
     } catch (error) {
 
@@ -369,10 +630,12 @@ function renderAgents() {
     const agents =
         getSavedAgents();
 
+
     const container =
         document.getElementById(
             "agentsList"
         );
+
 
     const count =
         document.getElementById(
@@ -397,41 +660,63 @@ function renderAgents() {
 
 
     container.innerHTML =
-        agents.map(agent => `
+        agents.map(agent => {
 
-            <div class="agent-card">
+            const tools =
+                Array.isArray(agent.tools)
+                    ? agent.tools
+                    : [];
 
-                <h3>
-                    🤖 ${escapeHtml(agent.name)}
-                </h3>
 
-                <p>
-                    ${escapeHtml(
-                        agent.instruction
-                    )}
-                </p>
+            const toolText =
+                tools.length > 0
+                    ? tools.map(tool =>
+                        `${TOOL_INFO[tool]?.icon || "🔧"} ${TOOL_INFO[tool]?.name || tool}`
+                      ).join(" • ")
+                    : "Tidak ada tool";
 
-                <div class="agent-card-buttons">
 
-                    <button
-                        class="open-agent"
-                        onclick="openAgent(${agent.id})"
-                    >
-                        BUKA
-                    </button>
+            return `
 
-                    <button
-                        class="delete-agent"
-                        onclick="deleteAgent(${agent.id})"
-                    >
-                        HAPUS
-                    </button>
+                <div class="agent-card">
+
+                    <h3>
+                        🤖 ${escapeHtml(agent.name)}
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(
+                            agent.instruction
+                        )}
+                    </p>
+
+                    <div class="agent-tools">
+                        🔧 ${escapeHtml(toolText)}
+                    </div>
+
+                    <div class="agent-card-buttons">
+
+                        <button
+                            class="open-agent"
+                            onclick="openAgent(${agent.id})"
+                        >
+                            BUKA
+                        </button>
+
+                        <button
+                            class="delete-agent"
+                            onclick="deleteAgent(${agent.id})"
+                        >
+                            HAPUS
+                        </button>
+
+                    </div>
 
                 </div>
 
-            </div>
+            `;
 
-        `).join("");
+        }).join("");
 }
 
 
@@ -443,6 +728,7 @@ function openAgent(id) {
 
     const agents =
         getSavedAgents();
+
 
     const agent =
         agents.find(
@@ -473,10 +759,38 @@ function openAgent(id) {
         agent.task || "";
 
 
+    /*
+    Restore tools.
+    Agent lama yang belum memiliki
+    property tools otomatis dianggap
+    tidak memiliki tool.
+    */
+
+    setSelectedTools(
+        Array.isArray(agent.tools)
+            ? agent.tools
+            : []
+    );
+
+
+    const toolText =
+        Array.isArray(agent.tools) &&
+        agent.tools.length > 0
+
+            ? agent.tools
+                .map(tool =>
+                    TOOL_INFO[tool]?.name || tool
+                )
+                .join(", ")
+
+            : "Tidak ada tool";
+
+
     document.getElementById(
         "result"
     ).innerText =
         `🤖 Agent "${agent.name}" berhasil dimuat.\n\n` +
+        `🔧 Tools: ${toolText}\n\n` +
         "Masukkan API Key jika diperlukan, lalu jalankan agent.";
 
 
@@ -561,15 +875,30 @@ function escapeHtml(value) {
 
     return String(value)
 
-        .replaceAll("&", "&amp;")
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
 
-        .replaceAll("<", "&lt;")
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
 
-        .replaceAll(">", "&gt;")
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
 
-        .replaceAll('"', "&quot;")
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
 
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
@@ -582,6 +911,8 @@ document.addEventListener(
     function () {
 
         renderAgents();
+
+        updateToolUI();
 
     }
 );
