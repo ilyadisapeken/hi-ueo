@@ -1,0 +1,26 @@
+name: Deploy HI-UEO Search Worker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "worker.js"
+      - ".github/workflows/deploy-search.yml"
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil kode dari GitHub
+        uses: actions/checkout@v6
+
+      - name: Deploy ke Cloudflare Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy worker.js --name hi-ueo-search
