@@ -1,245 +1,136 @@
 const GEMINI_MODEL = "gemini-3.1-flash-lite";
-
 const STORAGE_KEY = "hi_ueo_agents";
 
-
-/* =========================
-   TOOL INFORMATION
-========================= */
-
 const TOOL_INFO = {
-
     calculator: {
         name: "Calculator",
         icon: "🧮",
-        description:
-            "Menghitung operasi matematika."
+        description: "Menghitung operasi matematika."
     },
-
     text_processor: {
         name: "Text Processor",
         icon: "📝",
-        description:
-            "Mengolah, meringkas, memperbaiki, dan menyusun teks."
+        description: "Mengolah, meringkas, memperbaiki, dan menyusun teks."
     },
-
     web_search: {
         name: "Web Search",
         icon: "🌐",
-        description:
-            "Kemampuan untuk pencarian informasi web."
+        description: "Kemampuan untuk pencarian informasi web."
     }
-
 };
 
 
 /* =========================
-   GET AGENT NAME
+   BASIC AGENT FUNCTIONS
 ========================= */
 
 function getAgentName() {
-
-    const element =
-        document.getElementById("agentName");
-
-    return element?.value?.trim() ||
-        "HI-UEO Agent";
+    const input = document.getElementById("agentName");
+    return input ? input.value.trim() : "HI-UEO Agent";
 }
 
 
 /* =========================
-   TOOL TOGGLE
+   TOOL SELECTION
 ========================= */
 
 function toggleTool(card) {
-
-    if (!card) {
-        return;
-    }
+    if (!card) return;
 
     card.classList.toggle("active");
-
     updateToolUI();
 }
 
-
-/* =========================
-   GET SELECTED TOOLS
-========================= */
 
 function getSelectedTools() {
-
     return Array.from(
         document.querySelectorAll(".tool-card.active")
-    ).map(card =>
-        card.dataset.tool
-    );
+    ).map(card => card.dataset.tool);
 }
 
-
-/* =========================
-   UPDATE TOOL UI
-========================= */
 
 function updateToolUI() {
+    const selectedTools = getSelectedTools();
+    const status = document.getElementById("toolStatus");
 
-    const selectedTools =
-        getSelectedTools();
-
-    const status =
-        document.getElementById("toolStatus");
-
-
-    if (!status) {
-        return;
-    }
-
+    if (!status) return;
 
     if (selectedTools.length === 0) {
-
-        status.innerText =
-            "🔧 Belum ada tool dipilih.";
-
+        status.innerText = "🔧 Belum ada tool dipilih.";
         return;
     }
 
-
-    const names =
-        selectedTools.map(tool =>
-            TOOL_INFO[tool]?.name || tool
-        );
-
+    const names = selectedTools.map(
+        tool => TOOL_INFO[tool]?.name || tool
+    );
 
     status.innerText =
-        `🔧 ${selectedTools.length} tool aktif: ` +
-        names.join(", ");
+        `🔧 ${selectedTools.length} tool aktif: ${names.join(", ")}`;
 }
 
 
-/* =========================
-   SET SELECTED TOOLS
-========================= */
-
 function setSelectedTools(tools) {
+    const selected = Array.isArray(tools) ? tools : [];
 
-    const selected =
-        Array.isArray(tools)
-            ? tools
-            : [];
+    document.querySelectorAll(".tool-card").forEach(card => {
+        const tool = card.dataset.tool;
 
-
-    document
-        .querySelectorAll(".tool-card")
-        .forEach(card => {
-
-            const tool =
-                card.dataset.tool;
-
-            card.classList.toggle(
-                "active",
-                selected.includes(tool)
-            );
-
-        });
-
+        card.classList.toggle(
+            "active",
+            selected.includes(tool)
+        );
+    });
 
     updateToolUI();
 }
 
 
-/* ==================================================
-   REAL CALCULATOR TOOL
-================================================== */
-
-/*
-   Calculator hanya menerima karakter matematika
-   yang aman:
-
-   angka
-   + - * / %
-   kurung
-   titik
-   spasi
-
-   Contoh:
-   100 + 50
-   1000000 * 15 / 100
-   (500 + 250) * 2
-*/
-
+/* =========================
+   REAL CALCULATOR
+========================= */
 
 function calculateExpression(expression) {
-
     if (!expression) {
-        throw new Error(
-            "Ekspresi matematika kosong."
-        );
+        throw new Error("Ekspresi matematika kosong.");
     }
 
-
-    let clean =
-        String(expression)
-            .replace(/,/g, "")
-            .replace(/\s+/g, "");
-
-
-    /*
-       Hanya izinkan angka dan operator matematika.
-    */
+    let clean = String(expression)
+        .replace(/,/g, "")
+        .replace(/\s+/g, "");
 
     if (!/^[0-9+\-*/().%]+$/.test(clean)) {
-
         throw new Error(
             "Ekspresi mengandung karakter yang tidak didukung."
         );
     }
 
-
-    /*
-       Cegah pola operator yang berbahaya
-       atau tidak valid.
-    */
-
     if (
         clean.includes("**") ||
         clean.includes("//")
     ) {
-
         throw new Error(
             "Operator matematika tidak valid."
         );
     }
 
-
     try {
-
-        /*
-           Karena ekspresi sudah melewati whitelist
-           karakter matematika, evaluasi hanya dilakukan
-           terhadap ekspresi tersebut.
-        */
-
         const result =
             Function(
                 `"use strict"; return (${clean})`
             )();
 
-
         if (
             typeof result !== "number" ||
             !Number.isFinite(result)
         ) {
-
             throw new Error(
                 "Hasil perhitungan tidak valid."
             );
         }
 
-
         return result;
 
     } catch (error) {
-
         throw new Error(
             "Ekspresi matematika tidak valid."
         );
@@ -247,143 +138,86 @@ function calculateExpression(expression) {
 }
 
 
-/* =========================
-   FIND CALCULATIONS
-========================= */
-
 function findCalculationExpressions(text) {
-
     const expressions = [];
 
-
-    /*
-       Mencari pola sederhana seperti:
-
-       100 + 200
-       1000 * 15 / 100
-       (100 + 200) * 2
-    */
-
-    const matches =
-        text.match(
-            /(?:?\d+(?:[.,]\d+)??\s*(?:[+\-*/%]\s*?\d+(?:[.,]\d+)??)+)/g
-        );
-
+    const matches = text.match(
+        /(?:\(?\d+(?:[.,]\d+)?\)?\s*(?:[+\-*/%]\s*\(?\d+(?:[.,]\d+)?\)?)+)/g
+    );
 
     if (!matches) {
         return expressions;
     }
-
 
     matches.forEach(expression => {
 
         const normalized =
             expression.replace(/,/g, "");
 
-
         if (!expressions.includes(normalized)) {
-
-            expressions.push(
-                normalized
-            );
+            expressions.push(normalized);
         }
 
     });
 
-
     return expressions;
 }
 
-
-/* =========================
-   RUN CALCULATOR
-========================= */
 
 function runCalculator(task) {
 
     const expressions =
         findCalculationExpressions(task);
 
-
     if (expressions.length === 0) {
-
         return {
             used: false,
             results: []
         };
     }
 
-
     const results = [];
-
 
     for (const expression of expressions) {
 
         try {
 
             const value =
-                calculateExpression(
-                    expression
-                );
-
+                calculateExpression(expression);
 
             results.push({
-
-                expression:
-                    expression,
-
-                result:
-                    value
-
+                expression,
+                result: value
             });
 
         } catch (error) {
 
             results.push({
-
-                expression:
-                    expression,
-
-                error:
-                    error.message
-
+                expression,
+                error: error.message
             });
 
         }
-
     }
 
-
     return {
-
         used: true,
-
-        results:
-            results
-
+        results
     };
 }
 
-
-/* =========================
-   BUILD CALCULATOR CONTEXT
-========================= */
 
 function buildCalculatorContext(task) {
 
     const calculator =
         runCalculator(task);
 
-
     if (!calculator.used) {
-
         return "";
     }
 
-
     let context =
         "\n\nHASIL CALCULATOR HI-UEO:\n";
-
 
     calculator.results.forEach(item => {
 
@@ -396,22 +230,94 @@ function buildCalculatorContext(task) {
 
             context +=
                 `- ${item.expression} = ${item.result}\n`;
-
         }
 
     });
 
-
     context +=
         "\nGunakan hasil Calculator di atas jika relevan dengan tugas pengguna.\n";
-
 
     return context;
 }
 
 
 /* =========================
-   BUILD TOOL PROMPT
+   TEXT PROCESSOR
+========================= */
+
+function detectTextProcessorTask(task) {
+
+    const text = String(task).toLowerCase();
+
+    const keywords = [
+        "ringkas",
+        "rangkum",
+        "ringkasan",
+        "resume",
+        "summarize",
+        "summary",
+        "perbaiki teks",
+        "perbaiki tulisan",
+        "perbaiki kalimat",
+        "koreksi",
+        "rapikan",
+        "ubah gaya",
+        "parafrase",
+        "parafrasekan",
+        "buat lebih formal",
+        "buat lebih profesional",
+        "buat lebih singkat",
+        "buat lebih menarik",
+        "susun ulang",
+        "terjemahkan",
+        "translate",
+        "buat poin",
+        "poin utama"
+    ];
+
+    return keywords.some(
+        keyword => text.includes(keyword)
+    );
+}
+
+
+function buildTextProcessorContext(task) {
+
+    if (!detectTextProcessorTask(task)) {
+        return "";
+    }
+
+    return `
+    
+TEXT PROCESSOR HI-UEO AKTIF:
+
+Tugas pengguna berkaitan dengan pengolahan teks.
+
+Kemampuan yang dapat digunakan:
+- meringkas teks
+- membuat poin-poin utama
+- memperbaiki tata bahasa
+- memperbaiki struktur kalimat
+- membuat tulisan lebih profesional
+- membuat tulisan lebih singkat
+- membuat parafrase
+- menyusun ulang teks
+- mengubah gaya penulisan
+- menerjemahkan teks jika diminta
+
+ATURAN TEXT PROCESSOR:
+1. Pertahankan makna asli teks.
+2. Jangan menambahkan fakta yang tidak diminta.
+3. Jika diminta meringkas, fokus pada informasi paling penting.
+4. Jika diminta memperbaiki tulisan, pertahankan maksud penulis.
+5. Jika diminta membuat gaya tertentu, ikuti gaya tersebut.
+6. Berikan hasil akhir secara langsung.
+`;
+}
+
+
+/* =========================
+   TOOL INSTRUCTIONS
 ========================= */
 
 function buildToolInstructions(tools) {
@@ -424,43 +330,33 @@ Tidak ada tool tambahan yang dipilih.
 `;
     }
 
-
     const descriptions =
         tools.map(tool => {
 
             if (tool === "calculator") {
 
                 return `
-- Calculator: HI-UEO dapat melakukan perhitungan
-  matematika secara langsung sebelum meminta Gemini
-  menyusun jawaban.
+- Calculator: HI-UEO dapat melakukan perhitungan matematika secara langsung sebelum meminta Gemini menyusun jawaban.
 `;
             }
-
 
             if (tool === "text_processor") {
 
                 return `
-- Text Processor: digunakan untuk mengolah teks seperti
-  meringkas, memperbaiki, menyusun, atau mengubah gaya teks.
+- Text Processor: HI-UEO dapat membantu meringkas, memperbaiki, menyusun ulang, memparafrase, menerjemahkan, dan mengubah gaya teks.
 `;
             }
-
 
             if (tool === "web_search") {
 
                 return `
-- Web Search: disiapkan untuk pencarian informasi web.
-  Pada versi ini koneksi ke mesin pencari eksternal
-  belum tersedia. Jangan mengklaim telah browsing internet.
+- Web Search: disiapkan untuk pencarian informasi web. Pada versi ini koneksi ke mesin pencari eksternal belum tersedia. Jangan mengklaim telah browsing internet.
 `;
             }
-
 
             return "";
 
         }).join("");
-
 
     return `
 TOOLS AGENT:
@@ -482,25 +378,23 @@ async function runGemini(
     const selectedTools =
         getSelectedTools();
 
-
     const toolInstructions =
         buildToolInstructions(
             selectedTools
         );
-
-
-    /*
-       Jika Calculator aktif,
-       jalankan Calculator terlebih dahulu.
-    */
 
     const calculatorContext =
         selectedTools.includes("calculator")
             ? buildCalculatorContext(task)
             : "";
 
+    const textProcessorContext =
+        selectedTools.includes("text_processor")
+            ? buildTextProcessorContext(task)
+            : "";
 
     const prompt = `
+
 Kamu adalah AI Agent bernama "${getAgentName()}".
 
 INSTRUKSI AGENT:
@@ -513,6 +407,8 @@ ${toolInstructions}
 
 ${calculatorContext}
 
+${textProcessorContext}
+
 ATURAN:
 1. Pahami instruksi agent.
 2. Kerjakan tugas pengguna secara langsung.
@@ -521,41 +417,41 @@ ATURAN:
 5. Gunakan bahasa Indonesia kecuali pengguna meminta bahasa lain.
 6. Gunakan tool yang tersedia jika relevan.
 7. Jika terdapat HASIL CALCULATOR HI-UEO, gunakan hasil tersebut dan jangan mengubah angka hasil perhitungan.
-8. Jangan mengklaim menggunakan tool eksternal yang sebenarnya tidak tersedia.
+8. Jika Text Processor aktif dan tugas berkaitan dengan pengolahan teks, lakukan pengolahan teks sesuai permintaan pengguna.
+9. Jangan mengklaim menggunakan tool eksternal yang sebenarnya tidak tersedia.
+
 `;
 
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+        {
+            method: "POST",
 
-    const response =
-        await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-            {
-                method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey
+            },
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": apiKey
-                },
+            body: JSON.stringify({
 
-                body: JSON.stringify({
-
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: prompt
-                                }
-                            ]
-                        }
-                    ],
-
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 2000
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
                     }
+                ],
 
-                })
-            }
-        );
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 2000
+                }
+
+            })
+        }
+    );
 
 
     const data =
@@ -598,20 +494,28 @@ ATURAN:
 async function runAgent() {
 
     const apiKey =
-        document.getElementById("apiKey")
-            .value.trim();
+        document
+            .getElementById("apiKey")
+            .value
+            .trim();
 
     const name =
-        document.getElementById("agentName")
-            .value.trim();
+        document
+            .getElementById("agentName")
+            .value
+            .trim();
 
     const instruction =
-        document.getElementById("agentInstruction")
-            .value.trim();
+        document
+            .getElementById("agentInstruction")
+            .value
+            .trim();
 
     const task =
-        document.getElementById("agentTask")
-            .value.trim();
+        document
+            .getElementById("agentTask")
+            .value
+            .trim();
 
     const result =
         document.getElementById("result");
@@ -688,7 +592,9 @@ async function runAgent() {
 
 
     if (
-        selectedTools.includes("calculator")
+        selectedTools.includes(
+            "calculator"
+        )
     ) {
 
         const calc =
@@ -699,6 +605,7 @@ async function runAgent() {
 
             calculatorPreview =
                 "\n\n🧮 Calculator dijalankan...\n";
+
 
             calc.results.forEach(item => {
 
@@ -711,28 +618,49 @@ async function runAgent() {
 
                     calculatorPreview +=
                         `✓ ${item.expression} = ${item.result}\n`;
-
                 }
 
             });
-
         }
+    }
 
+
+    let textProcessorPreview = "";
+
+
+    if (
+        selectedTools.includes(
+            "text_processor"
+        ) &&
+        detectTextProcessorTask(task)
+    ) {
+
+        textProcessorPreview =
+            "\n📝 Text Processor aktif...\n";
     }
 
 
     result.innerText =
         "🤖 HI-UEO sedang bekerja...\n\n" +
+
         (
             selectedTools.length > 0
-                ? `🔧 Tools aktif: ${selectedTools
-                    .map(tool =>
-                        TOOL_INFO[tool]?.name || tool
-                    )
-                    .join(", ")}\n`
+                ? `🔧 Tools aktif: ${
+                    selectedTools
+                        .map(
+                            tool =>
+                                TOOL_INFO[tool]?.name ||
+                                tool
+                        )
+                        .join(", ")
+                }\n`
                 : ""
         ) +
+
         calculatorPreview +
+
+        textProcessorPreview +
+
         "\n⏳ Menghubungi Gemini...";
 
 
@@ -750,6 +678,7 @@ async function runAgent() {
             "✅ AGENT SELESAI\n\n" +
             output;
 
+
         statusText.innerText =
             "Completed";
 
@@ -762,11 +691,12 @@ async function runAgent() {
         result.innerText =
             "❌ AGENT GAGAL\n\n" +
             error.message +
-            "\n\n" +
-            "Periksa API Key dan koneksi internet.";
+            "\n\nPeriksa API Key dan koneksi internet.";
+
 
         statusText.innerText =
             "Error";
+
 
     } finally {
 
@@ -785,8 +715,432 @@ async function runAgent() {
 function saveAgent() {
 
     const name =
-        document.getElementById("agentName")
-            .value.trim();
+        document
+            .getElementById("agentName")
+            .value
+            .trim();
 
     const instruction =
-        document.get
+        document
+            .getElementById("agentInstruction")
+            .value
+            .trim();
+
+    const task =
+        document
+            .getElementById("agentTask")
+            .value
+            .trim();
+
+    const selectedTools =
+        getSelectedTools();
+
+    const result =
+        document.getElementById("result");
+
+    const statusText =
+        document.getElementById("statusText");
+
+
+    if (!name) {
+
+        result.innerText =
+            "❌ Isi Nama Agent terlebih dahulu.";
+
+        statusText.innerText =
+            "Nama agent diperlukan";
+
+        return;
+    }
+
+
+    if (!instruction) {
+
+        result.innerText =
+            "❌ Isi Instruksi Agent terlebih dahulu.";
+
+        statusText.innerText =
+            "Instruksi diperlukan";
+
+        return;
+    }
+
+
+    let agents =
+        getSavedAgents();
+
+
+    const newAgent = {
+
+        id: Date.now(),
+
+        name,
+
+        instruction,
+
+        task,
+
+        tools: selectedTools,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    agents.push(newAgent);
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(agents)
+    );
+
+
+    result.innerText =
+        "✅ AGENT TERSIMPAN\n\n" +
+
+        `"${name}" berhasil disimpan ke My Agents.\n\n` +
+
+        (
+            selectedTools.length > 0
+                ? "Tools: " +
+                    selectedTools
+                        .map(
+                            tool =>
+                                TOOL_INFO[tool]?.name ||
+                                tool
+                        )
+                        .join(", ")
+                : "Tidak menggunakan tool."
+        );
+
+
+    statusText.innerText =
+        "Agent Saved";
+
+
+    renderAgents();
+}
+
+
+/* =========================
+   MY AGENTS
+========================= */
+
+function getSavedAgents() {
+
+    try {
+
+        const data =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if (!data) return [];
+
+
+        const parsed =
+            JSON.parse(data);
+
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
+
+    } catch (error) {
+
+        console.error(
+            "Gagal membaca agent:",
+            error
+        );
+
+        return [];
+    }
+}
+
+
+function renderAgents() {
+
+    const agents =
+        getSavedAgents();
+
+    const container =
+        document.getElementById(
+            "agentsList"
+        );
+
+    const count =
+        document.getElementById(
+            "agentCount"
+        );
+
+
+    count.innerText =
+        `${agents.length} Agent`;
+
+
+    if (agents.length === 0) {
+
+        container.innerHTML =
+            `<div class="empty-agents">
+                Belum ada agent yang disimpan.
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        agents.map(agent => {
+
+            const tools =
+                Array.isArray(agent.tools)
+                    ? agent.tools
+                    : [];
+
+
+            const toolText =
+                tools.length > 0
+
+                    ? tools
+                        .map(
+                            tool =>
+                                `${TOOL_INFO[tool]?.icon || "🔧"} ${
+                                    TOOL_INFO[tool]?.name || tool
+                                }`
+                        )
+                        .join(" • ")
+
+                    : "Tidak ada tool";
+
+
+            return `
+
+                <div class="agent-card">
+
+                    <h3>
+                        🤖 ${escapeHtml(agent.name)}
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(agent.instruction)}
+                    </p>
+
+                    <div class="agent-tools">
+                        🔧 ${escapeHtml(toolText)}
+                    </div>
+
+                    <div class="agent-card-buttons">
+
+                        <button
+                            class="open-agent"
+                            onclick="openAgent(${agent.id})">
+                            BUKA
+                        </button>
+
+                        <button
+                            class="delete-agent"
+                            onclick="deleteAgent(${agent.id})">
+                            HAPUS
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+}
+
+
+/* =========================
+   OPEN AGENT
+========================= */
+
+function openAgent(id) {
+
+    const agents =
+        getSavedAgents();
+
+
+    const agent =
+        agents.find(
+            item => item.id === id
+        );
+
+
+    if (!agent) return;
+
+
+    document.getElementById(
+        "agentName"
+    ).value =
+        agent.name;
+
+
+    document.getElementById(
+        "agentInstruction"
+    ).value =
+        agent.instruction;
+
+
+    document.getElementById(
+        "agentTask"
+    ).value =
+        agent.task || "";
+
+
+    setSelectedTools(
+        Array.isArray(agent.tools)
+            ? agent.tools
+            : []
+    );
+
+
+    const toolText =
+        Array.isArray(agent.tools) &&
+        agent.tools.length > 0
+
+            ? agent.tools
+                .map(
+                    tool =>
+                        TOOL_INFO[tool]?.name ||
+                        tool
+                )
+                .join(", ")
+
+            : "Tidak ada tool";
+
+
+    document.getElementById(
+        "result"
+    ).innerText =
+
+        `🤖 Agent "${agent.name}" berhasil dimuat.\n\n` +
+
+        `🔧 Tools: ${toolText}\n\n` +
+
+        "Masukkan API Key jika diperlukan, lalu jalankan agent.";
+
+
+    document.getElementById(
+        "statusText"
+    ).innerText =
+        "Agent Loaded";
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+/* =========================
+   DELETE AGENT
+========================= */
+
+function deleteAgent(id) {
+
+    const agents =
+        getSavedAgents();
+
+
+    const agent =
+        agents.find(
+            item => item.id === id
+        );
+
+
+    if (!agent) return;
+
+
+    const confirmDelete =
+        confirm(
+            `Hapus agent "${agent.name}"?`
+        );
+
+
+    if (!confirmDelete) return;
+
+
+    const updatedAgents =
+        agents.filter(
+            item => item.id !== id
+        );
+
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updatedAgents)
+    );
+
+
+    renderAgents();
+
+
+    document.getElementById(
+        "result"
+    ).innerText =
+        `🗑️ Agent "${agent.name}" telah dihapus.`;
+
+
+    document.getElementById(
+        "statusText"
+    ).innerText =
+        "Agent Deleted";
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+/* =========================
+   STARTUP
+========================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        renderAgents();
+
+        updateToolUI();
+
+    }
+);
