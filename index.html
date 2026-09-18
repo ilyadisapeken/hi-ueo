@@ -184,6 +184,12 @@
             filter: brightness(1.08);
         }
 
+        button:disabled {
+            opacity: .6;
+            cursor: wait;
+            transform: none;
+        }
+
         .run-button {
             background: linear-gradient(135deg, #0ea5e9, #2563eb);
             color: #fff;
@@ -195,10 +201,65 @@
             border: 1px solid #475569;
         }
 
-        button:disabled {
-            opacity: .6;
-            cursor: wait;
-            transform: none;
+        .tools-section {
+            margin-top: 22px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .tool-card {
+            position: relative;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 16px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .tool-card:hover {
+            border-color: #38bdf8;
+        }
+
+        .tool-card.active {
+            border-color: #38bdf8;
+            background: rgba(14,165,233,.10);
+        }
+
+        .tool-card input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .tool-icon {
+            font-size: 25px;
+            margin-bottom: 9px;
+        }
+
+        .tool-card h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .tool-card p {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .tool-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #020617;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 13px;
         }
 
         .result-panel {
@@ -276,6 +337,12 @@
             color: #94a3b8;
             font-size: 13px;
             line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .agent-tools {
+            color: #7dd3fc;
+            font-size: 12px;
             margin-bottom: 15px;
         }
 
@@ -348,6 +415,7 @@
                 grid-template-columns: 1fr;
             }
 
+            .tools-grid,
             .features {
                 grid-template-columns: 1fr;
             }
@@ -378,7 +446,7 @@
 <header>
     <div class="header-inner">
         <div class="logo">HI-<span>UEO</span></div>
-        <div class="version">v0.2</div>
+        <div class="version">v0.3</div>
     </div>
 </header>
 
@@ -395,8 +463,8 @@
         </h1>
 
         <p>
-            Buat agent AI sendiri, simpan agent,
-            lalu gunakan kembali kapan saja.
+            Buat agent AI, pilih tools yang dibutuhkan,
+            simpan agent, dan gunakan kembali kapan saja.
         </p>
 
     </section>
@@ -408,7 +476,7 @@
             <h2>🤖 Create Agent</h2>
 
             <p class="panel-description">
-                Buat identitas, instruksi, dan tugas untuk agent AI kamu.
+                Tentukan identitas dan kemampuan agent kamu.
             </p>
 
             <label for="apiKey">
@@ -423,8 +491,7 @@
             >
 
             <div class="api-note">
-                🔒 API Key digunakan langsung dari browser dan tidak
-                disimpan sebagai bagian dari data agent.
+                🔒 API Key tidak disimpan bersama konfigurasi agent.
             </div>
 
             <label for="agentName">
@@ -489,14 +556,102 @@
             <div id="result">
 Hasil agent akan muncul di sini.
 
-Isi API Key, nama agent,
-instruksi, dan tugas,
+Buat agent, pilih tools,
 kemudian tekan RUN AGENT.
             </div>
 
         </section>
 
     </div>
+
+
+    <!-- TOOLS -->
+
+    <section class="panel tools-section">
+
+        <h2>🔧 Tools</h2>
+
+        <p class="panel-description">
+            Pilih kemampuan tambahan yang ingin digunakan oleh agent.
+        </p>
+
+        <div class="tools-grid">
+
+            <label class="tool-card">
+
+                <input
+                    type="checkbox"
+                    class="tool-checkbox"
+                    value="calculator"
+                    onchange="updateToolUI()"
+                >
+
+                <div class="tool-icon">🧮</div>
+
+                <h3>Calculator</h3>
+
+                <p>
+                    Membantu agent menangani kebutuhan
+                    perhitungan angka.
+                </p>
+
+            </label>
+
+
+            <label class="tool-card">
+
+                <input
+                    type="checkbox"
+                    class="tool-checkbox"
+                    value="text_processor"
+                    onchange="updateToolUI()"
+                >
+
+                <div class="tool-icon">📝</div>
+
+                <h3>Text Processor</h3>
+
+                <p>
+                    Membantu mengolah, meringkas,
+                    dan menyusun teks.
+                </p>
+
+            </label>
+
+
+            <label class="tool-card">
+
+                <input
+                    type="checkbox"
+                    class="tool-checkbox"
+                    value="web_search"
+                    onchange="updateToolUI()"
+                >
+
+                <div class="tool-icon">🌐</div>
+
+                <h3>Web Search</h3>
+
+                <p>
+                    Fondasi untuk kemampuan pencarian
+                    informasi dari internet.
+                </p>
+
+            </label>
+
+        </div>
+
+        <div
+            class="tool-status"
+            id="toolStatus"
+        >
+            🔧 Belum ada tool dipilih.
+        </div>
+
+    </section>
+
+
+    <!-- MY AGENTS -->
 
     <section class="agents-section panel">
 
@@ -514,40 +669,57 @@ kemudian tekan RUN AGENT.
         </div>
 
         <div id="agentsList">
+
             <div class="empty-agents">
                 Belum ada agent yang disimpan.
             </div>
+
         </div>
 
     </section>
 
+
     <section class="features">
 
         <div class="feature">
+
             <div class="feature-icon">🧠</div>
+
             <h3>AI Brain</h3>
+
             <p>
                 Agent menggunakan Gemini untuk memahami
                 instruksi dan menyelesaikan tugas.
             </p>
+
         </div>
 
-        <div class="feature">
-            <div class="feature-icon">💾</div>
-            <h3>Save Agent</h3>
-            <p>
-                Simpan konfigurasi agent di browser
-                dan gunakan kembali kapan saja.
-            </p>
-        </div>
 
         <div class="feature">
+
             <div class="feature-icon">🔧</div>
+
             <h3>Tools</h3>
+
             <p>
-                Tahap berikutnya agent akan dapat
-                menggunakan berbagai tools.
+                Pilih kemampuan tambahan untuk setiap
+                agent yang dibuat.
             </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">💾</div>
+
+            <h3>My Agents</h3>
+
+            <p>
+                Simpan konfigurasi agent dan gunakan
+                kembali kapan saja.
+            </p>
+
         </div>
 
     </section>
