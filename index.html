@@ -17,13 +17,13 @@
             font-family: Arial, Helvetica, sans-serif;
             background:
                 radial-gradient(circle at top, #1e3a8a 0%, #0f172a 45%);
-            color: #ffffff;
+            color: #fff;
             min-height: 100vh;
         }
 
         header {
             border-bottom: 1px solid rgba(255,255,255,.12);
-            background: rgba(15,23,42,.75);
+            background: rgba(15,23,42,.85);
             backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
@@ -42,7 +42,6 @@
         .logo {
             font-size: 25px;
             font-weight: 800;
-            letter-spacing: -1px;
         }
 
         .logo span {
@@ -58,15 +57,14 @@
         }
 
         main {
-            width: 100%;
             max-width: 1100px;
             margin: auto;
-            padding: 55px 20px;
+            padding: 45px 20px;
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 45px;
+            margin-bottom: 35px;
         }
 
         .badge {
@@ -77,13 +75,12 @@
             border: 1px solid rgba(56,189,248,.25);
             color: #7dd3fc;
             font-size: 13px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .hero h1 {
             font-size: clamp(34px, 7vw, 58px);
             line-height: 1.05;
-            letter-spacing: -2px;
             margin-bottom: 18px;
         }
 
@@ -106,7 +103,7 @@
         }
 
         .panel {
-            background: rgba(30,41,59,.82);
+            background: rgba(30,41,59,.85);
             border: 1px solid #334155;
             border-radius: 18px;
             padding: 25px;
@@ -115,14 +112,13 @@
 
         .panel h2 {
             font-size: 20px;
-            margin-bottom: 22px;
+            margin-bottom: 12px;
         }
 
         .panel-description {
             color: #94a3b8;
             font-size: 14px;
             line-height: 1.6;
-            margin-top: -12px;
             margin-bottom: 22px;
         }
 
@@ -135,12 +131,11 @@
         }
 
         input,
-        textarea,
-        select {
+        textarea {
             width: 100%;
             border: 1px solid #475569;
             background: #0f172a;
-            color: #ffffff;
+            color: #fff;
             border-radius: 11px;
             padding: 13px 14px;
             font-size: 14px;
@@ -149,8 +144,7 @@
         }
 
         input:focus,
-        textarea:focus,
-        select:focus {
+        textarea:focus {
             border-color: #38bdf8;
             box-shadow: 0 0 0 3px rgba(56,189,248,.1);
         }
@@ -169,25 +163,39 @@
             line-height: 1.5;
         }
 
-        .run-button {
-            width: 100%;
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
             border: none;
-            border-radius: 12px;
-            padding: 15px;
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            color: white;
-            font-size: 16px;
+            border-radius: 11px;
+            padding: 14px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
             transition: .2s;
         }
 
-        .run-button:hover {
+        button:hover {
             transform: translateY(-1px);
             filter: brightness(1.08);
         }
 
-        .run-button:disabled {
+        .run-button {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: #fff;
+        }
+
+        .save-button {
+            background: #334155;
+            color: #fff;
+            border: 1px solid #475569;
+        }
+
+        button:disabled {
             opacity: .6;
             cursor: wait;
             transform: none;
@@ -195,19 +203,6 @@
 
         .result-panel {
             margin-top: 22px;
-        }
-
-        #result {
-            min-height: 220px;
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 18px;
-            color: #cbd5e1;
-            white-space: pre-wrap;
-            line-height: 1.65;
-            font-size: 14px;
-            overflow-x: auto;
         }
 
         .status {
@@ -226,8 +221,92 @@
             background: #22c55e;
         }
 
+        #result {
+            min-height: 220px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 18px;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            line-height: 1.65;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .agents-section {
+            margin-top: 25px;
+        }
+
+        .agents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .agents-header h2 {
+            font-size: 20px;
+        }
+
+        .agent-count {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        #agentsList {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .agent-card {
+            background: rgba(15,23,42,.8);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .agent-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .agent-card p {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .agent-card-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .open-agent {
+            flex: 1;
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        .delete-agent {
+            background: #451a1a;
+            color: #fca5a5;
+            border: 1px solid #7f1d1d;
+        }
+
+        .empty-agents {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            border: 1px dashed #334155;
+            border-radius: 14px;
+        }
+
         .features {
-            margin-top: 35px;
+            margin-top: 25px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
@@ -264,30 +343,31 @@
         }
 
         @media (max-width: 800px) {
-            .grid {
+            .grid,
+            #agentsList {
                 grid-template-columns: 1fr;
             }
 
             .features {
                 grid-template-columns: 1fr;
             }
-
-            main {
-                padding: 40px 15px;
-            }
         }
 
         @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 36px;
+            main {
+                padding: 35px 15px;
             }
 
             .panel {
                 padding: 20px;
             }
 
-            .header-inner {
-                padding: 15px;
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 36px;
             }
         }
     </style>
@@ -298,7 +378,7 @@
 <header>
     <div class="header-inner">
         <div class="logo">HI-<span>UEO</span></div>
-        <div class="version">v0.1</div>
+        <div class="version">v0.2</div>
     </div>
 </header>
 
@@ -315,8 +395,8 @@
         </h1>
 
         <p>
-            Buat agent AI sendiri, berikan instruksi,
-            masukkan tugas, lalu biarkan AI mengerjakannya.
+            Buat agent AI sendiri, simpan agent,
+            lalu gunakan kembali kapan saja.
         </p>
 
     </section>
@@ -328,7 +408,7 @@
             <h2>🤖 Create Agent</h2>
 
             <p class="panel-description">
-                Tentukan identitas dan kemampuan agent yang ingin kamu buat.
+                Buat identitas, instruksi, dan tugas untuk agent AI kamu.
             </p>
 
             <label for="apiKey">
@@ -343,8 +423,8 @@
             >
 
             <div class="api-note">
-                🔒 API key hanya digunakan di browser ini dan tidak
-                disimpan di repository HI-UEO.
+                🔒 API Key digunakan langsung dari browser dan tidak
+                disimpan sebagai bagian dari data agent.
             </div>
 
             <label for="agentName">
@@ -363,7 +443,7 @@
 
             <textarea
                 id="agentInstruction"
-                placeholder="Contoh: Kamu adalah ahli content creator Indonesia. Buat konten yang menarik, praktis, dan mudah dipahami."
+                placeholder="Contoh: Kamu adalah ahli content creator Indonesia."
             ></textarea>
 
             <label for="agentTask">
@@ -372,16 +452,28 @@
 
             <textarea
                 id="agentTask"
-                placeholder="Contoh: Buat 5 ide konten Facebook untuk penjual UMKM."
+                placeholder="Contoh: Buat 5 ide konten Facebook untuk UMKM."
             ></textarea>
 
-            <button
-                class="run-button"
-                id="runButton"
-                onclick="runAgent()"
-            >
-                ▶ RUN AGENT
-            </button>
+            <div class="button-row">
+
+                <button
+                    class="run-button"
+                    id="runButton"
+                    onclick="runAgent()"
+                >
+                    ▶ RUN AGENT
+                </button>
+
+                <button
+                    class="save-button"
+                    id="saveButton"
+                    onclick="saveAgent()"
+                >
+                    💾 SAVE AGENT
+                </button>
+
+            </div>
 
         </section>
 
@@ -397,15 +489,37 @@
             <div id="result">
 Hasil agent akan muncul di sini.
 
-Contoh:
-"Masukkan API Key, nama agent,
-instruksi, dan tugas kemudian
-tekan RUN AGENT."
+Isi API Key, nama agent,
+instruksi, dan tugas,
+kemudian tekan RUN AGENT.
             </div>
 
         </section>
 
     </div>
+
+    <section class="agents-section panel">
+
+        <div class="agents-header">
+
+            <h2>🤖 My Agents</h2>
+
+            <span
+                class="agent-count"
+                id="agentCount"
+            >
+                0 Agent
+            </span>
+
+        </div>
+
+        <div id="agentsList">
+            <div class="empty-agents">
+                Belum ada agent yang disimpan.
+            </div>
+        </div>
+
+    </section>
 
     <section class="features">
 
@@ -413,8 +527,17 @@ tekan RUN AGENT."
             <div class="feature-icon">🧠</div>
             <h3>AI Brain</h3>
             <p>
-                Agent menggunakan model AI untuk memahami
+                Agent menggunakan Gemini untuk memahami
                 instruksi dan menyelesaikan tugas.
+            </p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">💾</div>
+            <h3>Save Agent</h3>
+            <p>
+                Simpan konfigurasi agent di browser
+                dan gunakan kembali kapan saja.
             </p>
         </div>
 
@@ -422,17 +545,8 @@ tekan RUN AGENT."
             <div class="feature-icon">🔧</div>
             <h3>Tools</h3>
             <p>
-                Nantinya agent dapat menggunakan berbagai
-                tools untuk melakukan pekerjaan.
-            </p>
-        </div>
-
-        <div class="feature">
-            <div class="feature-icon">🔄</div>
-            <h3>Workflow</h3>
-            <p>
-                Nantinya kita dapat menggabungkan beberapa
-                langkah menjadi workflow otomatis.
+                Tahap berikutnya agent akan dapat
+                menggunakan berbagai tools.
             </p>
         </div>
 
