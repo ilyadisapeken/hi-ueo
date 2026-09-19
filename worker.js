@@ -1,7 +1,7 @@
-const SEARXNG_URL = "https://searx.tiekoetter.com";
+const FREESEA_URL = "https://freesea.dev/v1/search";
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -10,6 +10,7 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
+        status: 204,
         headers: corsHeaders
       });
     }
@@ -19,79 +20,144 @@ export default {
       const query = url.searchParams.get("q");
 
       if (!query || query.trim().length < 2) {
-        return new Response(
-          JSON.stringify({
+        return jsonResponse(
+          {
             success: false,
             error: "Query pencarian kosong."
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-              ...corsHeaders
-            }
-          }
+          },
+          400,
+          corsHeaders
         );
       }
 
-      const searchUrl =
-        `${SEARXNG_URL}/search?q=` +
-        encodeURIComponent(query) +
-        `&format=json&language=id&categories=general`;
+      if (!env.FREESEA_API_KEY) {
+        return jsonResponse(
+          {
+            success: false,
+            error: "FREESEA_API_KEY belum terpasang di Cloudflare Worker."
+          },
+          500,
+          corsHeaders
+        );
+      }
 
-      const response = await fetch(searchUrl, {
+      const response = await fetch(FREESEA_URL, {
+        method: "POST",
         headers: {
-          "Accept": "application/json",
-          "User-Agent": "HI-UEO/1.0"
-        }
+          "Authorization": `Bearer ${env.FREESEA_API_KEY}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          query: query.trim()
+        })
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `Mesin pencarian mengembalikan status ${response.status}`
+      const rawText = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        return jsonResponse(
+          {
+            success: false,
+            error: `FreeSea mengembalikan respons bukan JSON. Status: ${response.status}`,
+            status: response.status
+          },
+          502,
+          corsHeaders
         );
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        return jsonResponse(
+          {
+            success: false,
+            error: "FreeSea menolak permintaan pencarian.",
+            status: response.status,
+            details: data
+          },
+          response.status,
+          corsHeaders
+        );
+      }
 
-      const results = Array.isArray(data.results)
-        ? data.results.slice(0, 8).map(item => ({
-            title: item.title || "",
-            url: item.url || "",
-            content: item.content || "",
-            engine: item.engine || ""
-          }))
-        : [];
+      const results = normalizeResults(data);
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          query: query,
-          results: results
-        }),
+      return jsonResponse(
         {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders
-          }
-        }
+          success: true,
+          query: query.trim(),
+          results: results,
+          raw: data
+        },
+        200,
+        corsHeaders
       );
 
     } catch (error) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: error.message
-        }),
+      return jsonResponse(
         {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders
-          }
-        }
+          success: false,
+          error: error.message || "Terjadi kesalahan pada Web Search."
+        },
+        500,
+        corsHeaders
       );
     }
   }
 };
+
+
+function normalizeResults(data) {
+  const possibleResults =
+    data?.results ||
+    data?.data?.results ||
+    data?.items ||
+    data?.data?.items ||
+    [];
+
+  if (!Array.isArray(possibleResults)) {
+    return [];
+  }
+
+  return possibleResults.slice(0, 10).map(item => ({
+    title:
+      item.title ||
+      item.name ||
+      "",
+
+    url:
+      item.url ||
+      item.link ||
+      item.href ||
+      "",
+
+    content:
+      item.content ||
+      item.snippet ||
+      item.description ||
+      "",
+
+    source:
+      item.source ||
+      item.domain ||
+      ""
+  }));
+}
+
+
+function jsonResponse(data, status, corsHeaders) {
+  return new Response(
+    JSON.stringify(data, null, 2),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        ...corsHeaders
+      }
+    }
+  );
+}
