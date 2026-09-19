@@ -23,15 +23,15 @@
 
         header {
             border-bottom: 1px solid rgba(255,255,255,.12);
-            background: rgba(15,23,42,.85);
+            background: rgba(15,23,42,.88);
             backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 20;
         }
 
         .header-inner {
-            max-width: 1100px;
+            max-width: 1150px;
             margin: auto;
             padding: 18px 20px;
             display: flex;
@@ -57,7 +57,7 @@
         }
 
         main {
-            max-width: 1100px;
+            max-width: 1150px;
             margin: auto;
             padding: 45px 20px;
         }
@@ -89,7 +89,7 @@
         }
 
         .hero p {
-            max-width: 650px;
+            max-width: 700px;
             margin: auto;
             color: #94a3b8;
             font-size: 17px;
@@ -131,7 +131,8 @@
         }
 
         input,
-        textarea {
+        textarea,
+        select {
             width: 100%;
             border: 1px solid #475569;
             background: #0f172a;
@@ -144,7 +145,8 @@
         }
 
         input:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
             border-color: #38bdf8;
             box-shadow: 0 0 0 3px rgba(56,189,248,.1);
         }
@@ -153,6 +155,14 @@
             min-height: 115px;
             resize: vertical;
             line-height: 1.5;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        option {
+            background: #0f172a;
         }
 
         .api-note {
@@ -201,7 +211,10 @@
             border: 1px solid #475569;
         }
 
-        .tools-section {
+        .tools-section,
+        .workflow-section,
+        .agents-section,
+        .result-panel {
             margin-top: 22px;
         }
 
@@ -210,14 +223,6 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
         }
-
-        /*
-        =========================================
-        TOOL CARD
-        Sekarang menggunakan BUTTON langsung.
-        Tidak ada checkbox tersembunyi.
-        =========================================
-        */
 
         .tool-card {
             position: relative;
@@ -292,8 +297,164 @@
             font-size: 13px;
         }
 
-        .result-panel {
-            margin-top: 22px;
+        /* WORKFLOW */
+
+        .workflow-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .workflow-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-step-button {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        .clear-workflow-button {
+            background: #334155;
+            color: #cbd5e1;
+        }
+
+        #workflowSteps {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .workflow-empty {
+            padding: 28px;
+            text-align: center;
+            color: #64748b;
+            border: 1px dashed #475569;
+            border-radius: 14px;
+        }
+
+        .workflow-step {
+            position: relative;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 18px;
+        }
+
+        .workflow-step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1d4ed8;
+            font-size: 13px;
+        }
+
+        .remove-step {
+            background: #451a1a;
+            color: #fca5a5;
+            border: 1px solid #7f1d1d;
+            padding: 8px 11px;
+        }
+
+        .step-arrow {
+            text-align: center;
+            color: #38bdf8;
+            font-size: 20px;
+            padding: 2px;
+        }
+
+        .workflow-help {
+            margin-top: 16px;
+            padding: 13px;
+            background: rgba(14,165,233,.08);
+            border: 1px solid rgba(56,189,248,.18);
+            border-radius: 11px;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .workflow-run-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .run-workflow-button {
+            background: linear-gradient(135deg, #8b5cf6, #2563eb);
+            color: #fff;
+        }
+
+        .save-workflow-button {
+            background: #334155;
+            color: #fff;
+            border: 1px solid #475569;
+        }
+
+        /* WORKFLOW OUTPUT */
+
+        #workflowOutput {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .workflow-result-empty {
+            padding: 25px;
+            color: #64748b;
+            text-align: center;
+            border: 1px dashed #334155;
+            border-radius: 12px;
+        }
+
+        .workflow-result-step {
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 13px;
+            overflow: hidden;
+        }
+
+        .workflow-result-header {
+            padding: 12px 15px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .workflow-result-body {
+            padding: 15px;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 13px;
+            overflow-x: auto;
         }
 
         .status {
@@ -325,9 +486,7 @@
             overflow-x: auto;
         }
 
-        .agents-section {
-            margin-top: 25px;
-        }
+        /* AGENTS */
 
         .agents-header {
             display: flex;
@@ -358,6 +517,11 @@
             padding: 18px;
         }
 
+        .agent-card.workflow-card {
+            border-color: #4c1d95;
+            background: rgba(76,29,149,.08);
+        }
+
         .agent-card h3 {
             font-size: 16px;
             margin-bottom: 8px;
@@ -374,6 +538,7 @@
             color: #7dd3fc;
             font-size: 12px;
             margin-bottom: 15px;
+            line-height: 1.6;
         }
 
         .agent-card-buttons {
@@ -449,6 +614,11 @@
             .features {
                 grid-template-columns: 1fr;
             }
+
+            .workflow-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
 
         @media (max-width: 480px) {
@@ -460,12 +630,21 @@
                 padding: 20px;
             }
 
-            .button-row {
+            .button-row,
+            .workflow-run-row {
                 grid-template-columns: 1fr;
             }
 
             .hero h1 {
                 font-size: 36px;
+            }
+
+            .workflow-buttons {
+                width: 100%;
+            }
+
+            .workflow-buttons button {
+                flex: 1;
             }
         }
     </style>
@@ -476,7 +655,7 @@
 <header>
     <div class="header-inner">
         <div class="logo">HI-<span>UEO</span></div>
-        <div class="version">v0.4</div>
+        <div class="version">v0.5 Workflow</div>
     </div>
 </header>
 
@@ -485,7 +664,7 @@
     <section class="hero">
 
         <div class="badge">
-            ⚡ AI Agent Builder
+            ⚡ AI Agent Builder + Workflow
         </div>
 
         <h1>
@@ -493,11 +672,14 @@
         </h1>
 
         <p>
-            Buat agent AI, pilih tools yang dibutuhkan,
+            Buat agent AI, gunakan tools, susun workflow multi-step,
             simpan agent, dan gunakan kembali kapan saja.
         </p>
 
     </section>
+
+
+    <!-- CREATE AGENT -->
 
     <div class="grid">
 
@@ -506,7 +688,7 @@
             <h2>🤖 Create Agent</h2>
 
             <p class="panel-description">
-                Tentukan identitas dan kemampuan agent kamu.
+                Buat agent biasa dengan Gemini dan tools yang tersedia.
             </p>
 
             <label for="apiKey">
@@ -532,7 +714,7 @@
             <input
                 type="text"
                 id="agentName"
-                placeholder="Contoh: YouTube Content Agent"
+                placeholder="Contoh: Research Agent"
             >
 
             <label for="agentInstruction">
@@ -541,7 +723,7 @@
 
             <textarea
                 id="agentInstruction"
-                placeholder="Contoh: Kamu adalah ahli content creator Indonesia."
+                placeholder="Contoh: Kamu adalah ahli riset dan content creator."
             ></textarea>
 
             <label for="agentTask">
@@ -550,7 +732,7 @@
 
             <textarea
                 id="agentTask"
-                placeholder="Contoh: Buat 5 ide konten Facebook untuk UMKM."
+                placeholder="Contoh: Cari 5 ide konten Facebook untuk UMKM."
             ></textarea>
 
             <div class="button-row">
@@ -574,6 +756,9 @@
             </div>
 
         </section>
+
+
+        <!-- AGENT OUTPUT -->
 
         <section class="panel">
 
@@ -604,7 +789,6 @@ kemudian tekan RUN AGENT.
 
         <p class="panel-description">
             Klik kartu tool untuk mengaktifkan atau menonaktifkannya.
-            Tool aktif akan ditandai dengan ✓.
         </p>
 
         <div class="tools-grid">
@@ -622,8 +806,7 @@ kemudian tekan RUN AGENT.
                 <h3>Calculator</h3>
 
                 <p>
-                    Membantu agent menangani kebutuhan
-                    perhitungan angka.
+                    Melakukan perhitungan matematika secara langsung.
                 </p>
             </button>
 
@@ -641,7 +824,7 @@ kemudian tekan RUN AGENT.
                 <h3>Text Processor</h3>
 
                 <p>
-                    Membantu mengolah, meringkas,
+                    Mengolah, meringkas, memperbaiki,
                     dan menyusun teks.
                 </p>
             </button>
@@ -660,18 +843,97 @@ kemudian tekan RUN AGENT.
                 <h3>Web Search</h3>
 
                 <p>
-                    Menandai agent untuk kebutuhan
-                    pencarian informasi web.
+                    Mencari informasi terbaru dari internet.
                 </p>
             </button>
 
         </div>
 
-        <div
-            class="tool-status"
-            id="toolStatus"
-        >
+        <div class="tool-status" id="toolStatus">
             🔧 Belum ada tool dipilih.
+        </div>
+
+    </section>
+
+
+    <!-- WORKFLOW BUILDER -->
+
+    <section class="panel workflow-section">
+
+        <div class="workflow-top">
+
+            <div>
+                <h2>⚙️ Workflow Builder</h2>
+
+                <p class="panel-description" style="margin-bottom:0">
+                    Susun beberapa langkah agar agent bekerja secara berurutan.
+                </p>
+            </div>
+
+            <div class="workflow-buttons">
+
+                <button
+                    class="add-step-button"
+                    onclick="addWorkflowStep()"
+                >
+                    ➕ Tambah Step
+                </button>
+
+                <button
+                    class="clear-workflow-button"
+                    onclick="clearWorkflow()"
+                >
+                    🗑️ Bersihkan
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="workflowSteps">
+
+            <div class="workflow-empty">
+                Belum ada step.<br>
+                Klik <strong>Tambah Step</strong> untuk membuat workflow.
+            </div>
+
+        </div>
+
+
+        <div class="workflow-help">
+            💡 <strong>Cara kerja:</strong>
+            hasil dari Step 1 otomatis menjadi input Step 2,
+            lalu hasil Step 2 diteruskan ke Step 3, dan seterusnya.
+        </div>
+
+
+        <div class="workflow-run-row">
+
+            <button
+                class="run-workflow-button"
+                id="runWorkflowButton"
+                onclick="runWorkflow()"
+            >
+                ▶ RUN WORKFLOW
+            </button>
+
+            <button
+                class="save-workflow-button"
+                onclick="saveWorkflow()"
+            >
+                💾 SAVE WORKFLOW
+            </button>
+
+        </div>
+
+
+        <div id="workflowOutput">
+
+            <div class="workflow-result-empty">
+                Hasil workflow akan muncul di sini.
+            </div>
+
         </div>
 
     </section>
@@ -714,8 +976,8 @@ kemudian tekan RUN AGENT.
             <h3>AI Brain</h3>
 
             <p>
-                Agent menggunakan Gemini untuk memahami
-                instruksi dan menyelesaikan tugas.
+                Gemini memahami instruksi dan menyelesaikan
+                tugas agent.
             </p>
 
         </div>
@@ -723,13 +985,13 @@ kemudian tekan RUN AGENT.
 
         <div class="feature">
 
-            <div class="feature-icon">🔧</div>
+            <div class="feature-icon">🔗</div>
 
-            <h3>Tools</h3>
+            <h3>Multi-Step Workflow</h3>
 
             <p>
-                Pilih kemampuan tambahan untuk setiap
-                agent yang dibuat.
+                Hasil setiap langkah dapat diteruskan
+                otomatis ke langkah berikutnya.
             </p>
 
         </div>
@@ -742,8 +1004,8 @@ kemudian tekan RUN AGENT.
             <h3>My Agents</h3>
 
             <p>
-                Simpan konfigurasi agent dan gunakan
-                kembali kapan saja.
+                Simpan agent dan workflow di browser
+                untuk digunakan kembali.
             </p>
 
         </div>
