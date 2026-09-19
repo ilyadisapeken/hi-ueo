@@ -1,1022 +1,576 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>HI-UEO — AI Agent Builder</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background:
-                radial-gradient(circle at top, #1e3a8a 0%, #0f172a 45%);
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        header {
-            border-bottom: 1px solid rgba(255,255,255,.12);
-            background: rgba(15,23,42,.88);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-
-        .header-inner {
-            max-width: 1150px;
-            margin: auto;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-size: 25px;
-            font-weight: 800;
-        }
-
-        .logo span {
-            color: #38bdf8;
-        }
-
-        .version {
-            font-size: 12px;
-            color: #94a3b8;
-            border: 1px solid #334155;
-            padding: 6px 10px;
-            border-radius: 20px;
-        }
-
-        main {
-            max-width: 1150px;
-            margin: auto;
-            padding: 45px 20px;
-        }
-
-        .hero {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 8px 14px;
-            border-radius: 30px;
-            background: rgba(56,189,248,.12);
-            border: 1px solid rgba(56,189,248,.25);
-            color: #7dd3fc;
-            font-size: 13px;
-            margin-bottom: 18px;
-        }
-
-        .hero h1 {
-            font-size: clamp(34px, 7vw, 58px);
-            line-height: 1.05;
-            margin-bottom: 18px;
-        }
-
-        .hero h1 span {
-            color: #38bdf8;
-        }
-
-        .hero p {
-            max-width: 700px;
-            margin: auto;
-            color: #94a3b8;
-            font-size: 17px;
-            line-height: 1.7;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-
-        .panel {
-            background: rgba(30,41,59,.85);
-            border: 1px solid #334155;
-            border-radius: 18px;
-            padding: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,.18);
-        }
-
-        .panel h2 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-
-        .panel-description {
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 22px;
-        }
-
-        label {
-            display: block;
-            color: #cbd5e1;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: #fff;
-            border-radius: 11px;
-            padding: 13px 14px;
-            font-size: 14px;
-            outline: none;
-            margin-bottom: 18px;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56,189,248,.1);
-        }
-
-        textarea {
-            min-height: 115px;
-            resize: vertical;
-            line-height: 1.5;
-        }
-
-        select {
-            cursor: pointer;
-        }
-
-        option {
-            background: #0f172a;
-        }
-
-        .api-note {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: -10px;
-            margin-bottom: 18px;
-            line-height: 1.5;
-        }
-
-        .button-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        button {
-            border: none;
-            border-radius: 11px;
-            padding: 14px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: .2s;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.08);
-        }
-
-        button:disabled {
-            opacity: .6;
-            cursor: wait;
-            transform: none;
-        }
-
-        .run-button {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            color: #fff;
-        }
-
-        .save-button {
-            background: #334155;
-            color: #fff;
-            border: 1px solid #475569;
-        }
-
-        .tools-section,
-        .workflow-section,
-        .agents-section,
-        .result-panel {
-            margin-top: 22px;
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .tool-card {
-            position: relative;
-            width: 100%;
-            text-align: left;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 14px;
-            padding: 18px;
-            cursor: pointer;
-            transition: .2s;
-            color: #fff;
-        }
-
-        .tool-card:hover {
-            border-color: #38bdf8;
-            transform: translateY(-2px);
-        }
-
-        .tool-card.active {
-            border-color: #38bdf8;
-            background: rgba(14,165,233,.12);
-            box-shadow: 0 0 0 2px rgba(56,189,248,.08);
-        }
-
-        .tool-check {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1e293b;
-            color: transparent;
-            font-size: 14px;
-            border: 1px solid #475569;
-        }
-
-        .tool-card.active .tool-check {
-            background: #0ea5e9;
-            color: #fff;
-            border-color: #38bdf8;
-        }
-
-        .tool-icon {
-            font-size: 27px;
-            margin-bottom: 10px;
-        }
-
-        .tool-card h3 {
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .tool-card p {
-            color: #94a3b8;
-            font-size: 12px;
-            line-height: 1.5;
-            padding-right: 15px;
-        }
-
-        .tool-status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-            background: #020617;
-            border: 1px solid #334155;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-
-        /* WORKFLOW */
-
-        .workflow-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 18px;
-        }
-
-        .workflow-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .add-step-button {
-            background: #0ea5e9;
-            color: #fff;
-        }
-
-        .clear-workflow-button {
-            background: #334155;
-            color: #cbd5e1;
-        }
-
-        #workflowSteps {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .workflow-empty {
-            padding: 28px;
-            text-align: center;
-            color: #64748b;
-            border: 1px dashed #475569;
-            border-radius: 14px;
-        }
-
-        .workflow-step {
-            position: relative;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 15px;
-            padding: 18px;
-        }
-
-        .workflow-step-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .step-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-        }
-
-        .step-number {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1d4ed8;
-            font-size: 13px;
-        }
-
-        .remove-step {
-            background: #451a1a;
-            color: #fca5a5;
-            border: 1px solid #7f1d1d;
-            padding: 8px 11px;
-        }
-
-        .step-arrow {
-            text-align: center;
-            color: #38bdf8;
-            font-size: 20px;
-            padding: 2px;
-        }
-
-        .workflow-help {
-            margin-top: 16px;
-            padding: 13px;
-            background: rgba(14,165,233,.08);
-            border: 1px solid rgba(56,189,248,.18);
-            border-radius: 11px;
-            color: #94a3b8;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .workflow-run-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .run-workflow-button {
-            background: linear-gradient(135deg, #8b5cf6, #2563eb);
-            color: #fff;
-        }
-
-        .save-workflow-button {
-            background: #334155;
-            color: #fff;
-            border: 1px solid #475569;
-        }
-
-        /* WORKFLOW OUTPUT */
-
-        #workflowOutput {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .workflow-result-empty {
-            padding: 25px;
-            color: #64748b;
-            text-align: center;
-            border: 1px dashed #334155;
-            border-radius: 12px;
-        }
-
-        .workflow-result-step {
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 13px;
-            overflow: hidden;
-        }
-
-        .workflow-result-header {
-            padding: 12px 15px;
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .workflow-result-body {
-            padding: 15px;
-            color: #cbd5e1;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            font-size: 13px;
-            overflow-x: auto;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-        }
-
-        #result {
-            min-height: 220px;
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 18px;
-            color: #cbd5e1;
-            white-space: pre-wrap;
-            line-height: 1.65;
-            font-size: 14px;
-            overflow-x: auto;
-        }
-
-        /* AGENTS */
-
-        .agents-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .agents-header h2 {
-            font-size: 20px;
-        }
-
-        .agent-count {
-            color: #94a3b8;
-            font-size: 13px;
-        }
-
-        #agentsList {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .agent-card {
-            background: rgba(15,23,42,.8);
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        .agent-card.workflow-card {
-            border-color: #4c1d95;
-            background: rgba(76,29,149,.08);
-        }
-
-        .agent-card h3 {
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        .agent-card p {
-            color: #94a3b8;
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-
-        .agent-tools {
-            color: #7dd3fc;
-            font-size: 12px;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .agent-card-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .open-agent {
-            flex: 1;
-            background: #1d4ed8;
-            color: #fff;
-        }
-
-        .delete-agent {
-            background: #451a1a;
-            color: #fca5a5;
-            border: 1px solid #7f1d1d;
-        }
-
-        .empty-agents {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 30px;
-            color: #64748b;
-            border: 1px dashed #334155;
-            border-radius: 14px;
-        }
-
-        .features {
-            margin-top: 25px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .feature {
-            background: rgba(15,23,42,.65);
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        .feature-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .feature h3 {
-            font-size: 15px;
-            margin-bottom: 7px;
-        }
-
-        .feature p {
-            color: #94a3b8;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        footer {
-            text-align: center;
-            color: #64748b;
-            font-size: 12px;
-            padding: 35px 20px;
-        }
-
-        @media (max-width: 800px) {
-            .grid,
-            #agentsList {
-                grid-template-columns: 1fr;
-            }
-
-            .tools-grid,
-            .features {
-                grid-template-columns: 1fr;
-            }
-
-            .workflow-top {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 480px) {
-            main {
-                padding: 35px 15px;
-            }
-
-            .panel {
-                padding: 20px;
-            }
-
-            .button-row,
-            .workflow-run-row {
-                grid-template-columns: 1fr;
-            }
-
-            .hero h1 {
-                font-size: 36px;
-            }
-
-            .workflow-buttons {
-                width: 100%;
-            }
-
-            .workflow-buttons button {
-                flex: 1;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HI-UEO — AI Agent Builder</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#07111f;
+    color:#e8f0ff;
+    line-height:1.6;
+}
+
+.container{
+    width:min(1180px,94%);
+    margin:auto;
+}
+
+header{
+    padding:45px 0 30px;
+    text-align:center;
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:30px;
+    background:#102a49;
+    color:#6db7ff;
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+h1{
+    font-size:clamp(32px,6vw,56px);
+    margin-bottom:10px;
+}
+
+.hero-text{
+    color:#9fb1ca;
+    max-width:700px;
+    margin:auto;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:25px;
+}
+
+.card{
+    background:#0c1a2b;
+    border:1px solid #19304d;
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+
+.card h2{
+    margin-bottom:18px;
+    font-size:21px;
+}
+
+label{
+    display:block;
+    margin:14px 0 7px;
+    color:#b9c9dc;
+    font-size:14px;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    background:#07111f;
+    color:#fff;
+    border:1px solid #29435f;
+    border-radius:10px;
+    padding:12px;
+    outline:none;
+    font-size:14px;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    border-color:#429cff;
+}
+
+textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:11px 16px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-1px);
+    opacity:.92;
+}
+
+.primary{
+    background:#1677ff;
+    color:white;
+}
+
+.secondary{
+    background:#17304d;
+    color:#dcecff;
+}
+
+.success{
+    background:#16885c;
+    color:white;
+}
+
+.danger{
+    background:#8d2734;
+    color:white;
+}
+
+.full{
+    width:100%;
+    margin-top:15px;
+}
+
+.status{
+    margin-top:12px;
+    color:#78baff;
+    font-size:14px;
+}
+
+.result{
+    background:#07111f;
+    border:1px solid #1b3858;
+    border-radius:12px;
+    padding:16px;
+    min-height:250px;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.tools{
+    margin-top:20px;
+}
+
+.tool-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.tool-card{
+    padding:16px;
+    background:#091728;
+    border:1px solid #203b59;
+    border-radius:12px;
+    cursor:pointer;
+    text-align:center;
+    transition:.2s;
+}
+
+.tool-card:hover{
+    border-color:#368ff0;
+}
+
+.tool-card.active{
+    background:#102e50;
+    border-color:#3c9cff;
+    box-shadow:0 0 0 1px #3c9cff;
+}
+
+.tool-icon{
+    font-size:27px;
+    margin-bottom:5px;
+}
+
+.tool-name{
+    font-weight:bold;
+}
+
+.tool-desc{
+    color:#91a7c1;
+    font-size:12px;
+}
+
+.section{
+    margin-top:20px;
+}
+
+.workflow-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
+
+.workflow-steps{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.workflow-step{
+    border:1px solid #21415f;
+    background:#081625;
+    border-radius:15px;
+    padding:17px;
+}
+
+.step-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+}
+
+.step-number{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#1677ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    flex-shrink:0;
+}
+
+.step-title{
+    flex:1;
+}
+
+.step-title strong{
+    display:block;
+}
+
+.step-title span{
+    color:#7791ae;
+    font-size:12px;
+}
+
+.step-controls{
+    display:flex;
+    gap:5px;
+}
+
+.small-btn{
+    padding:7px 10px;
+    font-size:12px;
+}
+
+.workflow-arrow{
+    text-align:center;
+    color:#4d9fff;
+    font-size:22px;
+    margin:-4px 0;
+}
+
+.workflow-result{
+    margin-top:18px;
+}
+
+.workflow-result-box{
+    background:#07111f;
+    border:1px solid #1b3858;
+    border-radius:12px;
+    padding:15px;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.step-result{
+    margin-top:12px;
+    border-left:3px solid #267fd8;
+    padding-left:12px;
+}
+
+.step-result-title{
+    font-size:13px;
+    color:#78baff;
+    margin-bottom:5px;
+}
+
+.agent-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.agent-item{
+    background:#081625;
+    border:1px solid #1c3855;
+    border-radius:12px;
+    padding:14px;
+}
+
+.agent-item-header{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+}
+
+.agent-type{
+    font-size:11px;
+    color:#75b7ff;
+}
+
+.agent-item p{
+    color:#8ea5bf;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.agent-buttons{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+}
+
+.empty{
+    color:#71859d;
+    padding:20px 0;
+    text-align:center;
+}
+
+footer{
+    text-align:center;
+    padding:45px 0;
+    color:#657b95;
+    font-size:13px;
+}
+
+@media(max-width:800px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .tool-grid{
+        grid-template-columns:1fr;
+    }
+
+    .step-header{
+        flex-wrap:wrap;
+    }
+
+    .step-title{
+        min-width:150px;
+    }
+}
+</style>
 </head>
 
 <body>
 
+<div class="container">
+
 <header>
-    <div class="header-inner">
-        <div class="logo">HI-<span>UEO</span></div>
-        <div class="version">v0.5 Workflow</div>
-    </div>
+    <div class="badge">HI-UEO v0.6 Workflow Engine</div>
+    <h1>Build Your AI Agent</h1>
+    <p class="hero-text">
+        Buat AI Agent, gunakan tools, dan susun beberapa langkah
+        menjadi satu workflow otomatis.
+    </p>
 </header>
 
-<main>
+<div class="grid">
 
-    <section class="hero">
+<section class="card">
 
-        <div class="badge">
-            ⚡ AI Agent Builder + Workflow
+    <h2>🤖 Create Agent</h2>
+
+    <label for="apiKey">Gemini API Key</label>
+    <input
+        id="apiKey"
+        type="password"
+        placeholder="Masukkan Gemini API Key"
+    >
+
+    <label for="agentName">Agent Name</label>
+    <input
+        id="agentName"
+        placeholder="Contoh: Content Agent"
+    >
+
+    <label for="agentInstruction">Agent Instruction</label>
+    <textarea
+        id="agentInstruction"
+        placeholder="Contoh: Kamu adalah AI assistant yang membantu membuat konten."
+    ></textarea>
+
+    <label for="agentTask">Task</label>
+    <textarea
+        id="agentTask"
+        placeholder="Tuliskan tugas yang ingin dikerjakan..."
+    ></textarea>
+
+    <button id="runButton" class="primary full">
+        ▶ RUN AGENT
+    </button>
+
+    <button id="saveButton" class="success full">
+        💾 SAVE AGENT
+    </button>
+
+    <div id="statusText" class="status">
+        Siap.
+    </div>
+
+</section>
+
+<section class="card">
+
+    <h2>📤 Agent Output</h2>
+
+    <div id="result" class="result">
+        Hasil agent akan muncul di sini.
+    </div>
+
+</section>
+
+</div>
+
+<section class="card tools">
+
+    <h2>🧰 Tools Manager</h2>
+
+    <div class="tool-grid">
+
+        <div
+            class="tool-card"
+            data-tool="calculator"
+            onclick="toggleTool(this)"
+        >
+            <div class="tool-icon">🧮</div>
+            <div class="tool-name">Calculator</div>
+            <div class="tool-desc">
+                Menghitung operasi matematika
+            </div>
         </div>
 
-        <h1>
-            Build Your <span>AI Agent</span>
-        </h1>
-
-        <p>
-            Buat agent AI, gunakan tools, susun workflow multi-step,
-            simpan agent, dan gunakan kembali kapan saja.
-        </p>
-
-    </section>
-
-
-    <!-- CREATE AGENT -->
-
-    <div class="grid">
-
-        <section class="panel">
-
-            <h2>🤖 Create Agent</h2>
-
-            <p class="panel-description">
-                Buat agent biasa dengan Gemini dan tools yang tersedia.
-            </p>
-
-            <label for="apiKey">
-                Gemini API Key
-            </label>
-
-            <input
-                type="password"
-                id="apiKey"
-                placeholder="Masukkan Gemini API Key"
-                autocomplete="off"
-            >
-
-            <div class="api-note">
-                🔒 API Key tidak disimpan bersama konfigurasi agent.
-                API Key digunakan langsung oleh browser untuk menghubungi Gemini.
+        <div
+            class="tool-card"
+            data-tool="text_processor"
+            onclick="toggleTool(this)"
+        >
+            <div class="tool-icon">📝</div>
+            <div class="tool-name">Text Processor</div>
+            <div class="tool-desc">
+                Memproses dan menganalisis teks
             </div>
+        </div>
 
-            <label for="agentName">
-                Nama Agent
-            </label>
-
-            <input
-                type="text"
-                id="agentName"
-                placeholder="Contoh: Research Agent"
-            >
-
-            <label for="agentInstruction">
-                Instruksi Agent
-            </label>
-
-            <textarea
-                id="agentInstruction"
-                placeholder="Contoh: Kamu adalah ahli riset dan content creator."
-            ></textarea>
-
-            <label for="agentTask">
-                Tugas
-            </label>
-
-            <textarea
-                id="agentTask"
-                placeholder="Contoh: Cari 5 ide konten Facebook untuk UMKM."
-            ></textarea>
-
-            <div class="button-row">
-
-                <button
-                    class="run-button"
-                    id="runButton"
-                    onclick="runAgent()"
-                >
-                    ▶ RUN AGENT
-                </button>
-
-                <button
-                    class="save-button"
-                    id="saveButton"
-                    onclick="saveAgent()"
-                >
-                    💾 SAVE AGENT
-                </button>
-
+        <div
+            class="tool-card"
+            data-tool="web_search"
+            onclick="toggleTool(this)"
+        >
+            <div class="tool-icon">🌐</div>
+            <div class="tool-name">Web Search</div>
+            <div class="tool-desc">
+                Mencari informasi terbaru
             </div>
-
-        </section>
-
-
-        <!-- AGENT OUTPUT -->
-
-        <section class="panel">
-
-            <h2>⚡ Agent Output</h2>
-
-            <div class="status">
-                <span class="dot"></span>
-                <span id="statusText">Ready</span>
-            </div>
-
-            <div id="result">
-Hasil agent akan muncul di sini.
-
-Buat agent, pilih tools,
-kemudian tekan RUN AGENT.
-            </div>
-
-        </section>
+        </div>
 
     </div>
 
+    <div id="toolStatus" class="status">
+        Tidak ada tool dipilih.
+    </div>
 
-    <!-- TOOLS -->
+</section>
 
-    <section class="panel tools-section">
+<section class="card section">
 
-        <h2>🔧 Tools</h2>
+    <h2>🔗 Workflow Builder</h2>
 
-        <p class="panel-description">
-            Klik kartu tool untuk mengaktifkan atau menonaktifkannya.
-        </p>
+    <p style="color:#8fa6bf;margin-bottom:15px;">
+        Gabungkan beberapa langkah. Output dari satu langkah
+        otomatis menjadi konteks untuk langkah berikutnya.
+    </p>
 
-        <div class="tools-grid">
+    <div class="workflow-actions">
 
-            <button
-                type="button"
-                class="tool-card"
-                data-tool="calculator"
-                onclick="toggleTool(this)"
-            >
-                <span class="tool-check">✓</span>
+        <button
+            class="primary"
+            onclick="addWorkflowStep()"
+        >
+            ➕ Add Step
+        </button>
 
-                <div class="tool-icon">🧮</div>
+        <button
+            class="secondary"
+            onclick="clearWorkflow()"
+        >
+            🗑 Clear
+        </button>
 
-                <h3>Calculator</h3>
+        <button
+            id="runWorkflowButton"
+            class="success"
+            onclick="runWorkflow()"
+        >
+            ▶ Run Workflow
+        </button>
 
-                <p>
-                    Melakukan perhitungan matematika secara langsung.
-                </p>
-            </button>
+        <button
+            class="secondary"
+            onclick="saveWorkflow()"
+        >
+            💾 Save Workflow
+        </button>
 
+    </div>
 
-            <button
-                type="button"
-                class="tool-card"
-                data-tool="text_processor"
-                onclick="toggleTool(this)"
-            >
-                <span class="tool-check">✓</span>
+    <div id="workflowSteps" class="workflow-steps"></div>
 
-                <div class="tool-icon">📝</div>
+    <div
+        id="workflowOutput"
+        class="workflow-result"
+    ></div>
 
-                <h3>Text Processor</h3>
+</section>
 
-                <p>
-                    Mengolah, meringkas, memperbaiki,
-                    dan menyusun teks.
-                </p>
-            </button>
+<section class="card section">
 
+    <h2>📁 My Agents & Workflows</h2>
 
-            <button
-                type="button"
-                class="tool-card"
-                data-tool="web_search"
-                onclick="toggleTool(this)"
-            >
-                <span class="tool-check">✓</span>
+    <div id="agentsList" class="agent-list"></div>
 
-                <div class="tool-icon">🌐</div>
+</section>
 
-                <h3>Web Search</h3>
+<section class="card section">
 
-                <p>
-                    Mencari informasi terbaru dari internet.
-                </p>
-            </button>
+    <h2>✨ HI-UEO Features</h2>
 
-        </div>
+    <p style="color:#9ab0c9;">
+        • AI Agent Builder<br>
+        • Gemini Integration<br>
+        • Calculator Tool<br>
+        • Text Processor Tool<br>
+        • Web Search Tool<br>
+        • Multi-Step Workflow<br>
+        • Save Agent<br>
+        • Save Workflow<br>
+        • Local Browser Storage<br>
+        • Free Architecture
+    </p>
 
-        <div class="tool-status" id="toolStatus">
-            🔧 Belum ada tool dipilih.
-        </div>
-
-    </section>
-
-
-    <!-- WORKFLOW BUILDER -->
-
-    <section class="panel workflow-section">
-
-        <div class="workflow-top">
-
-            <div>
-                <h2>⚙️ Workflow Builder</h2>
-
-                <p class="panel-description" style="margin-bottom:0">
-                    Susun beberapa langkah agar agent bekerja secara berurutan.
-                </p>
-            </div>
-
-            <div class="workflow-buttons">
-
-                <button
-                    class="add-step-button"
-                    onclick="addWorkflowStep()"
-                >
-                    ➕ Tambah Step
-                </button>
-
-                <button
-                    class="clear-workflow-button"
-                    onclick="clearWorkflow()"
-                >
-                    🗑️ Bersihkan
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div id="workflowSteps">
-
-            <div class="workflow-empty">
-                Belum ada step.<br>
-                Klik <strong>Tambah Step</strong> untuk membuat workflow.
-            </div>
-
-        </div>
-
-
-        <div class="workflow-help">
-            💡 <strong>Cara kerja:</strong>
-            hasil dari Step 1 otomatis menjadi input Step 2,
-            lalu hasil Step 2 diteruskan ke Step 3, dan seterusnya.
-        </div>
-
-
-        <div class="workflow-run-row">
-
-            <button
-                class="run-workflow-button"
-                id="runWorkflowButton"
-                onclick="runWorkflow()"
-            >
-                ▶ RUN WORKFLOW
-            </button>
-
-            <button
-                class="save-workflow-button"
-                onclick="saveWorkflow()"
-            >
-                💾 SAVE WORKFLOW
-            </button>
-
-        </div>
-
-
-        <div id="workflowOutput">
-
-            <div class="workflow-result-empty">
-                Hasil workflow akan muncul di sini.
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- MY AGENTS -->
-
-    <section class="agents-section panel">
-
-        <div class="agents-header">
-
-            <h2>🤖 My Agents</h2>
-
-            <span
-                class="agent-count"
-                id="agentCount"
-            >
-                0 Agent
-            </span>
-
-        </div>
-
-        <div id="agentsList">
-
-            <div class="empty-agents">
-                Belum ada agent yang disimpan.
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <section class="features">
-
-        <div class="feature">
-
-            <div class="feature-icon">🧠</div>
-
-            <h3>AI Brain</h3>
-
-            <p>
-                Gemini memahami instruksi dan menyelesaikan
-                tugas agent.
-            </p>
-
-        </div>
-
-
-        <div class="feature">
-
-            <div class="feature-icon">🔗</div>
-
-            <h3>Multi-Step Workflow</h3>
-
-            <p>
-                Hasil setiap langkah dapat diteruskan
-                otomatis ke langkah berikutnya.
-            </p>
-
-        </div>
-
-
-        <div class="feature">
-
-            <div class="feature-icon">💾</div>
-
-            <h3>My Agents</h3>
-
-            <p>
-                Simpan agent dan workflow di browser
-                untuk digunakan kembali.
-            </p>
-
-        </div>
-
-    </section>
-
-</main>
+</section>
 
 <footer>
     HI-UEO — AI Agent Builder
 </footer>
+
+</div>
 
 <script src="app.js"></script>
 
