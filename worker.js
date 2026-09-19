@@ -1,4 +1,4 @@
-const SEARXNG_URL = "https://search.bus-hit.me";
+const SEARXNG_URL = "https://searx.tiekoetter.com";
 
 export default {
   async fetch(request) {
